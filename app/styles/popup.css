@@ -1,0 +1,18 @@
+body {
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  width: 480px;
+  height: 600px;
+  font-size: 16px;
+}
+
+.btn, .btn-large, .btn-flat {
+  text-transform: none;
+}
+
+.container {
+  padding-top: 20px;
+}
+
+.input-field label.active {
+  font-size: 1rem;
+}

@@ -1,0 +1,101 @@
+/* Patches for materialize */
+.container {
+  width: 90% !important;
+}
+
+.brand-logo {
+  padding-left: 20px !important;
+}
+
+.btn, .btn-large, .btn-flat {
+  text-transform: none;
+}
+
+.dropdown-content.active {
+  position: fixed !important;
+}
+
+#feedDates .badge {
+  position: absolute;
+  margin-left: 0;
+  line-height: inherit;
+}
+
+.collection-item, .btn-link {
+  cursor: pointer;
+}
+
+@media only screen and (min-width: 601px) {
+  #feedItems .col.m6 {
+    width: 48%;
+  }
+}
+
+@media only screen and (min-width: 993px) {
+  #feedItems .col.l4 {
+    width: 32%;
+  }
+}
+
+body {
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Card */
+.card a {
+  color: #262626;
+}
+
+.card-header {
+  padding: 14px 20px !important;
+}
+
+.card-owner {
+  display: block;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  -webkit-flex-shrink: 1;
+  -ms-flex-negative: 1;
+  flex-shrink: 1;
+  overflow: hidden;
+}
+
+.card-owner a {
+  display: block;
+  max-width: 100%;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-profile img {
+  margin: -1px 10px -1px -5px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+
+.card .card-content {
+  font-size: 15px;
+  word-break: break-word;
+  overflow: hidden;
+  max-height: 100px;
+  padding: 10px 20px;
+}
+
+.likeIcon {
+  color: #ed4956 !important;
+}
+
+.commentIcon {
+  color: #3f51b5 !important;
+}

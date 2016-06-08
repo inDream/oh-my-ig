@@ -1,0 +1,11 @@
+{
+  "name": "oh-my-ig",
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {
+    "Materialize": "materialize#^0.97.6",
+    "imagesloaded": "^4.1.0",
+    "fetch": "^1.0.0"
+  },
+  "devDependencies": {}
+}

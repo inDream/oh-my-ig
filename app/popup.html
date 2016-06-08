@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+    <!-- build:css styles/popup-vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/Materialize/bin/materialize.css" />
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css styles/popup.css -->
+    <link href="styles/popup.css" rel="stylesheet">
+    <!-- endbuild -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  </head>
+  <body>
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#!" class="brand-logo">Oh My IG</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="row">
+        <a href="feed.html" target="_blank" class="col s6 push-s3 waves-effect waves-light btn-large">Feed</a>
+      </div>
+      <div class="row">
+        <a id="sync" class="col s6 push-s3 waves-effect waves-light btn-large">Start Sync</a>
+      </div>
+      <hr>
+      <div class="row">
+        <h5>Options</h5>
+        <div class="input-field col s6">
+          <input id="syncCount" type="number" class="validate" placeholder="1-33" min="1" max="33">
+          <label for="syncCount" class="active">Sync Count</label>
+        </div>
+        <div class="input-field col s6">
+          <input id="syncEach" type="number" class="validate" placeholder="12-100" min="12" max="100">
+          <label for="syncEach" class="active">No of items sync each time</label>
+        </div>
+        <div class="input-field col s6">
+          <input id="syncOneInt" type="number" class="validate" placeholder="1-999" min="1" max="999">
+          <label for="syncOneInt" class="active">Sync One Feed Interval (mins)</label>
+        </div>
+        <div class="input-field col s6">
+          <input id="syncInt" type="number" class="validate" placeholder="1-999" min="1" max="999">
+          <label for="syncInt" class="active">Sync Multi Feed Interval (mins)</label>
+        </div>
+      </div>
+      <div class="row">
+        <a id="saveOptions" class="col s6 push-s3 waves-effect waves-light btn">Save</a>
+      </div>
+    </div>
+
+    <!-- build:js scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/Materialize/bin/materialize.js"></script>
+    <script src="bower_components/ev-emitter/ev-emitter.js"></script>
+    <script src="bower_components/imagesloaded/imagesloaded.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <script src="scripts/popup.js"></script>
+  </body>
+</html>
