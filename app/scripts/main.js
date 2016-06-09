@@ -50,7 +50,6 @@ class Main {
     // Event handler
     $('#feedDates').on('click', 'a', (e) => {
       let date = $(e.currentTarget).data('date') + '';
-      this.currentKey = date;
       this.loadFeed(date);
     });
 
@@ -64,9 +63,27 @@ class Main {
     });
 
     $('#feedItems').isotope();
+
+    DB.g('options')
+      .then(options => {
+        // Setup auto reload
+        if (options.autoReload) {
+          setInterval(this.autoReload.bind(this), options.autoReload * 60000);
+        }
+      });
+  }
+
+  autoReload() {
+    DB.g(this.currentKey)
+      .then(items => {
+        if (this.currentItems.length !== items.length) {
+          this.loadFeed(this.currentKey);
+        }
+      })
   }
 
   loadFeed(date) {
+    this.currentKey = date;
     $('.titleDate').text(moment(+date * 100000).format('DD/MM/YYYY'));
     let $container = $('#feedItems');
     $container.empty().isotope('destroy');

@@ -14,18 +14,15 @@ function setupAlarms() {
 
 // Set up init options
 chrome.storage.local.get('options', res => {
-  if (res.options) {
-    options = res.options;
-  } else {
-    let defaultOptions = {
-      syncCount: 10,
-      syncEach: 12,
-      syncInt: 60,
-      syncOneInt: 15
-    };
-    chrome.storage.local.set({options: defaultOptions});
-    options = defaultOptions;
-  }
+  let defaultOptions = {
+    autoReload: 5,
+    syncCount: 10,
+    syncEach: 12,
+    syncInt: 60,
+    syncOneInt: 15
+  };
+  options = Object.assign(defaultOptions, res.options);
+  chrome.storage.local.set({options: options});
 
   fetcher = new Fetcher(options);
   // Export for main page
