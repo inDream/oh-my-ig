@@ -16,6 +16,7 @@ function setupAlarms() {
 chrome.storage.local.get('options', res => {
   let defaultOptions = {
     autoReload: 5,
+    feedPerPage: 50,
     syncCount: 10,
     syncEach: 12,
     syncInt: 60,

@@ -4,7 +4,8 @@ $('#sync').click(() => {
   chrome.runtime.sendMessage({action: 'sync'});
 });
 
-let options = ['autoReload', 'syncCount', 'syncEach', 'syncInt', 'syncOneInt'];
+let options = ['autoReload', 'feedPerPage',
+  'syncCount', 'syncEach', 'syncInt', 'syncOneInt'];
 $('#saveOptions').click(() => {
   let data = {};
   options.forEach(o => {

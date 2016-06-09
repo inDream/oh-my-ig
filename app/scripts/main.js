@@ -21,6 +21,8 @@ class Main {
     this.base = 'https://www.instagram.com/';
     this.currentKey = null;
     this.currentItems = null;
+    this.currentPage = null;
+    this.totalPages = null;
     this.sortBy = 'date';
     this.sortOrder = false;
   }
@@ -70,7 +72,26 @@ class Main {
         if (options.autoReload) {
           setInterval(this.autoReload.bind(this), options.autoReload * 60000);
         }
+        this.feedPerPage = options.feedPerPage;
       });
+
+    $('.pagination').click((e) => {
+      let $e = e.target.tagName == 'LI' ? $(e.target) :
+        $(e.target).parents('li');
+      if ($e.not('.active')) {
+        if ($e.is('.pagination-left') && this.currentPage > 1) {
+          this.currentPage--;
+        } else if ($e.is('.pagination-right') && 
+          this.currentPage < this.totalPages) {
+          this.currentPage++;
+        } else if ($e.is('.pages')) {
+          this.currentPage = $e.text();
+        } else {
+          return;
+        }
+        this.setItemContent();
+      }
+    });
   }
 
   autoReload() {
@@ -84,90 +105,99 @@ class Main {
 
   loadFeed(date) {
     this.currentKey = date;
+    this.currentPage = 1;
     $('.titleDate').text(moment(+date * 100000).format('DD/MM/YYYY'));
-    let $container = $('#feedItems');
-    $container.empty().isotope('destroy');
-    let html = '';
     DB.g(date).then(items => {
       items = items.sort((a, b) => b.date - a.date);
       this.currentItems = items;
+      this.totalPages = Math.ceil(items.length / this.feedPerPage);
       console.log(`Loaded ${items.length} items from ${date}.`);
-      items.forEach(item => {
-        let location = item.location ? item.location.name : '';
-        let locationId = item.location ? item.location.id : '';
-        let date = moment(item.date * 1000);
-        let timeago = date.fromNow(true);
-        let fulldate = date.format('LLLL');
-        let caption = item.caption || '';
-        let profile = `${this.base}${item.owner.username}/`;
-        let link = `${this.base}p/${item.code}/`;
-        let likeIcon = `favorite${item.likes.viewer_has_liked ? '' : '_border'}`;
+      this.setItemContent();
+    });
+  }
 
-        let template = `<div class="col s12 m6 l4">
-          <div class="card">
-            <div class="card-content card-header">
-              <a class="left card-profile">
-                <img src="${item.owner.profile_pic_url}">
-              </a>
-              <a href="${link}" class="right" target="_blank">
-                <time ts="${item.date}" title="${fulldate}">${timeago}</time>
-              </a>
-              <div class="card-owner">
-                <a href="${profile}" target="_blank">${item.owner.username}</a>
-                <a href="${this.base}explore/locations/${locationId}/" target="_blank">${location}</a>
-              </div>
-            </div>
-            <div class="card-image">
-              <img class="materialboxed" src="${item.display_src}">
-            </div>
-            <div class="card-content">
-              <p>${caption}</p>
-            </div>
-            <div class="card-action">
-              <a class="btn-link likeIcon" data-id="${item.id}" data-code="${item.code}">
-                <i class="material-icons">${likeIcon}</i>
-                <span class="likes">${item.likes.count}</span>
-              </a>
-              <a class="btn-link commentIcon">
-                <i class="material-icons">chat_bubble_outline</i>
-                <span class="comments">${item.comments.count}</span>
-              </a>
+  setItemContent() {
+    let start = this.feedPerPage * (this.currentPage - 1);
+    let items = this.currentItems.slice(start, start + this.feedPerPage);
+    let html = '';
+    let $container = $('#feedItems');
+    $container.empty().isotope('destroy');
+    items.forEach(item => {
+      let location = item.location ? item.location.name : '';
+      let locationId = item.location ? item.location.id : '';
+      let date = moment(item.date * 1000);
+      let timeago = date.fromNow(true);
+      let fulldate = date.format('LLLL');
+      let caption = item.caption || '';
+      let profile = `${this.base}${item.owner.username}/`;
+      let link = `${this.base}p/${item.code}/`;
+      let likeIcon = `favorite${item.likes.viewer_has_liked ? '' : '_border'}`;
+
+      let template = `<div class="col s12 m6 l4">
+        <div class="card">
+          <div class="card-content card-header">
+            <a class="left card-profile">
+              <img src="${item.owner.profile_pic_url}">
+            </a>
+            <a href="${link}" class="right" target="_blank">
+              <time ts="${item.date}" title="${fulldate}">${timeago}</time>
+            </a>
+            <div class="card-owner">
+              <a href="${profile}" target="_blank">${item.owner.username}</a>
+              <a href="${this.base}explore/locations/${locationId}/" target="_blank">${location}</a>
             </div>
           </div>
-        </div>`;
-        html += template;
-      });
-      $container.html(html);
-      $('.materialboxed').materialbox();
+          <div class="card-image">
+            <img class="materialboxed" src="${item.display_src}">
+          </div>
+          <div class="card-content">
+            <p>${caption}</p>
+          </div>
+          <div class="card-action">
+            <a class="btn-link likeIcon" data-id="${item.id}" data-code="${item.code}">
+              <i class="material-icons">${likeIcon}</i>
+              <span class="likes">${item.likes.count}</span>
+            </a>
+            <a class="btn-link commentIcon">
+              <i class="material-icons">chat_bubble_outline</i>
+              <span class="comments">${item.comments.count}</span>
+            </a>
+          </div>
+        </div>
+      </div>`;
+      html += template;
+    });
+    $container.html(html);
+    $('.materialboxed').materialbox();
 
-      $container.isotope({
-        sortBy: this.sortBy,
-        sortAscending: this.sortOrder,
-        getSortData: {
-          date: e => {
-            return +$(e).find('time').attr('ts');
-          },
-          likes: e => {
-            return +$(e).find('.likes').text();
-          },
-          comments: e => {
-            return +$(e).find('.comments').text();
-          }
+    $container.isotope({
+      sortBy: this.sortBy,
+      sortAscending: this.sortOrder,
+      getSortData: {
+        date: e => {
+          return +$(e).find('time').attr('ts');
+        },
+        likes: e => {
+          return +$(e).find('.likes').text();
+        },
+        comments: e => {
+          return +$(e).find('.comments').text();
+        }
+      }
+    });
+
+    let total = $container.find('img').length;
+    let count = 0;
+    $container.imagesLoaded()
+      .progress(() => {
+        count++;
+        if (count % Math.round(total / 10) == 0) {
+          $container.isotope('layout');
         }
       });
 
-      let total = $container.find('img').length;
-      let count = 0;
-      $container.imagesLoaded()
-        .progress(() => {
-          count++;
-          if (count % Math.round(total / 10) == 0) {
-            $container.isotope('layout');
-          }
-        });
-
-      this.setItemEvents();
-    });
+    this.setPagination();
+    this.setItemEvents();
   }
 
   setItemEvents() {
@@ -207,6 +237,16 @@ class Main {
           });
       });
     });
+  }
+
+  setPagination() {
+    $('.pagination .pages').remove();
+    let pages = this.totalPages;
+    let html = new Array(pages).fill('').map((page, i) => {
+      let klass = (i + 1) == this.currentPage ? 'active' : '';
+      return `<li class="${klass} btn-link pages"><a>${i + 1}</a></li>`;
+    }).join('');
+    $('.pagination-left').after(html);
   }
 
   sortFeed(e) {
