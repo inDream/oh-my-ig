@@ -42,8 +42,8 @@ body {
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
 
-.hidden {
-  display: none;
+.pagination li.pages {
+  width: 30px;
 }
 
 /* Card */
@@ -67,7 +67,7 @@ body {
   overflow: hidden;
 }
 
-.card-owner a {
+.card-owner a, .card-owner span {
   display: block;
   max-width: 100%;
   font-weight: 700;
@@ -98,4 +98,26 @@ body {
 
 .commentIcon {
   color: #3f51b5 !important;
+}
+
+/* Magnific Popup */
+.mfp-title {
+  padding-right: 50px;
+}
+
+.card-video {
+  opacity: 0.6;
+}
+
+.card-video i {
+  color: #eeeeee;
+  font-size: 6em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -45px;
+  margin-top: -45px;
+  z-index: 1;
+  text-shadow: 0 0 10px #673AB7;
+  cursor: pointer;
 }

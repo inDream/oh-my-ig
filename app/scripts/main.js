@@ -132,6 +132,8 @@ class Main {
       let profile = `${this.base}${item.owner.username}/`;
       let link = `${this.base}p/${item.code}/`;
       let likeIcon = `favorite${item.likes.viewer_has_liked ? '' : '_border'}`;
+      let popupLink = `<a class="mfp mfp-${item.is_video ? 'iframe' : 'image'}"
+        href="${item.is_video ? item.video_url : item.display_src}">`;
 
       let template = `<div class="col s12 m6 l4">
         <div class="card">
@@ -143,15 +145,16 @@ class Main {
               <time ts="${item.date}" title="${fulldate}">${timeago}</time>
             </a>
             <div class="card-owner">
-              <a href="${profile}" target="_blank">${item.owner.username}</a>
+              <a class="owner" href="${profile}" target="_blank">${item.owner.username}</a>
               <a href="${this.base}explore/locations/${locationId}/" target="_blank">${location}</a>
             </div>
           </div>
-          <div class="card-image">
-            <img class="materialboxed" src="${item.display_src}">
+          <div class="card-image ${item.is_video ? 'card-video': ''}">
+            ${item.is_video ? '<i class="material-icons">play_arrow</i>': ''}
+            ${popupLink}<img src="${item.display_src}"></a>
           </div>
           <div class="card-content">
-            <p>${caption}</p>
+            <p class="caption">${caption}</p>
           </div>
           <div class="card-action">
             <a class="btn-link likeIcon" data-id="${item.id}" data-code="${item.code}">
@@ -168,7 +171,6 @@ class Main {
       html += template;
     });
     $container.html(html);
-    $('.materialboxed').materialbox();
 
     $container.isotope({
       sortBy: this.sortBy,
@@ -182,6 +184,25 @@ class Main {
         },
         comments: e => {
           return +$(e).find('.comments').text();
+        }
+      }
+    });
+
+    $container.magnificPopup({
+      delegate: '.mfp',
+      gallery: {
+        enabled: true,
+        navigateByImgClick: true,
+        preload: [0, 1]
+      },
+      image: {
+        titleSrc: item => {
+          let $card = item.el.parents('.card');
+          let caption = $card.find('.caption').text();
+          let owner = $card.find('.owner').text();
+          let time = $card.find('time').text();
+          return `<div class="card-owner"><span>${caption}</span>
+            <small>by ${owner} ${time} ago</small></div>`;
         }
       }
     });
