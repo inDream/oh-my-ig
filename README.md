@@ -3,7 +3,9 @@ Provide what you expected from Instagram.
 
 ## Features
 - Auto sync feeds
-- Sort & Filter feed by date, likes and comments
+- Display feeds
+  - Auto reload & Pagination
+  - Sort & Filter by date, likes and comments
 - Planned:
   - Notification about new feeds
   - Export photos from profile
