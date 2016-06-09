@@ -4,7 +4,7 @@ var gulp = require('gulp');
 var gulpLoadPlugins = require('gulp-load-plugins');
 var del = require('del');
 var runSequence = require('run-sequence');
-var wiredep = require('wiredep');
+var wiredep = require('wiredep').stream;
 
 const $ = gulpLoadPlugins();
 
@@ -111,7 +111,7 @@ gulp.task('copy', () => {
     'node_modules/chrome-promise/chrome-promise.js',
     'node_modules/moment/min/moment.min.js',
     'node_modules/isotope-layout/dist/isotope.pkgd.min.js',
-    'app/bower_components/fetch/fetch.js'
+    'node_modules/whatwg-fetch/fetch.js'
     ])
   .pipe(gulp.dest('app/scripts/libs'))
   .pipe(gulp.dest('dist/scripts/libs'));
