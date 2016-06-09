@@ -11,6 +11,7 @@ $('#saveOptions').click(() => {
     data[o] = +$('#' + o).val();
   });
   chrome.runtime.sendMessage({action: 'saveOptions', data: data});
+  Materialize.toast('Saved!', 3000);
 });
 
 $(() => {

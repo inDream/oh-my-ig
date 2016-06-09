@@ -61,10 +61,12 @@ class Fetcher {
     let temp = {};
     items.forEach(item => {
       let key = moment(item.date * 1000).startOf('day') / 100000;
-      if (temp[key] === undefined) {
-        temp[key] = [];
+      if (key) {
+        if (temp[key] === undefined) {
+          temp[key] = [];
+        }
+        temp[key].push(item);
       }
-      temp[key].push(item);
     });
     Object.keys(temp).forEach(key => {
       return DB.push(key, temp[key]);

@@ -16,11 +16,12 @@
       "scripts/libs/moment.min.js",
       "scripts/src/fetcher.js",
       "scripts/src/database.js",
-      "scripts/background.js"
+      "scripts/background.js",
+      "scripts/analytics.js"
     ],
     "persistent": true
   },
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com/ https://www.google-analytics.com; object-src 'self'",
   "permissions": [
     "alarms",
     "notifications",
