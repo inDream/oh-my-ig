@@ -97,7 +97,14 @@ class Main {
   autoReload() {
     DB.g(this.currentKey)
       .then(items => {
-        if (this.currentItems.length !== items.length) {
+        let newItems = items.length - this.currentItems.length;
+        if (newItems > 0) {
+          chrome.notifications.create('sync', {
+            type: 'basic',
+            iconUrl: 'images/icon-128.png',
+            title: 'Oh My IG',
+            message: `Synced ${newItems} new feed${newItems > 1 ? 's' : ''}.`
+          });
           this.loadFeed(this.currentKey);
         }
       })
