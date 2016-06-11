@@ -23,6 +23,7 @@ class Main {
     this.currentItems = null;
     this.currentPage = null;
     this.totalPages = null;
+    this.searchQuery = null;
     this.sortBy = 'date';
     this.sortOrder = false;
   }
@@ -125,9 +126,14 @@ class Main {
     });
   }
 
-  setItemContent() {
-    let start = this.feedPerPage * (this.currentPage - 1);
-    let items = this.currentItems.slice(start, start + this.feedPerPage);
+  setItemContent(filter) {
+    let items;
+    if (filter) {
+      items = this.currentItems;
+    } else {
+      let start = this.feedPerPage * (this.currentPage - 1);
+      items = this.currentItems.slice(start, start + this.feedPerPage);
+    }
     let html = '';
     let $container = $('#feedItems');
     $container.empty().isotope('destroy');
@@ -308,11 +314,21 @@ class Main {
 
   _filterFeed(e) {
     let search = $(e.target).val();
-    $('#feedItems').isotope({
-      filter: (items, item) => {
-        return search ? $(item).text().match(search) : true;
+    if (search) {
+      if (this.searchQuery === search) {
+        return;
+      } else if (!this.searchQuery) {
+        this.setItemContent(true);
       }
-    });
+      this.searchQuery = search;
+      let regexp = new RegExp(search, 'i');
+      $('#feedItems').isotope({
+        filter: (items, item) => $(item).text().match(regexp)
+      });
+    } else if (this.searchQuery) {
+      this.searchQuery = null;
+      this.setItemContent();
+    }
   }
 }
 
