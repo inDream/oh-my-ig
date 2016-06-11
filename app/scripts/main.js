@@ -23,6 +23,7 @@ class Main {
     this.currentItems = null;
     this.currentPage = null;
     this.totalPages = null;
+    this.filterQuery = null;
     this.searchQuery = null;
     this.sortBy = 'date';
     this.sortOrder = false;
@@ -59,6 +60,9 @@ class Main {
     $('#sortOrder').click();
     $('#sortFeed').click(this.sortFeed.bind(this));
     $('#filterFeed').keyup(this.filterFeed.bind(this));
+    $('#searchFeed').keyup(this.searchFeed.bind(this));
+    $('#searchLiked').click(this.searchFeed.bind(this));
+    $('#resetSearch').click(this.resetSearch.bind(this));
     $('.brand-logo').click(() => window.scrollTo(0, 0));
 
     // Fix for multiple dropdown activate
@@ -87,7 +91,7 @@ class Main {
           this.currentPage < this.totalPages) {
           this.currentPage++;
         } else if ($e.is('.pages')) {
-          this.currentPage = $e.text();
+          this.currentPage = +$e.text();
         } else {
           return;
         }
@@ -108,32 +112,37 @@ class Main {
             title: 'Oh My IG',
             message: `Synced ${newItems} new feed${newItems > 1 ? 's' : ''}.`
           });
-          this.loadFeed(this.currentKey);
+          if (!this.searchQuery && !this.filterQuery) {
+            this.loadFeed(this.currentKey);
+          }
         }
       })
   }
 
   loadFeed(date) {
     this.currentKey = date;
-    this.currentPage = 1;
     $('.titleDate').text(moment(+date * 100000).format('DD/MM/YYYY'));
     DB.g(date).then(items => {
-      items = items.sort((a, b) => b.date - a.date);
-      this.currentItems = items;
-      this.totalPages = Math.ceil(items.length / this.feedPerPage);
+      this._sortItems(items);
       console.log(`Loaded ${items.length} items from ${date}.`);
       this.setItemContent();
     });
   }
 
-  setItemContent(filter) {
-    let items;
-    if (filter) {
-      items = this.currentItems;
-    } else {
-      let start = this.feedPerPage * (this.currentPage - 1);
-      items = this.currentItems.slice(start, start + this.feedPerPage);
-    }
+  _sortItems(items) {
+    let s = this.sortBy;
+    this.currentItems = items.sort((a, b) => {
+      let x = this.sortOrder ? a : b;
+      let y = this.sortOrder ? b : a;
+      return s === 'date' ? x[s] - y[s] : x[s].count - y[s].count;
+    });
+    this.currentPage = 1;
+  }
+
+  setItemContent() {
+    let start = this.feedPerPage * (this.currentPage - 1);
+    let items = this.currentItems.slice(start, start + this.feedPerPage);
+    this.totalPages = Math.ceil(this.currentItems.length / this.feedPerPage);
     let html = '';
     let $container = $('#feedItems');
     $container.empty().isotope('destroy');
@@ -162,7 +171,7 @@ class Main {
               <img src="${item.owner.profile_pic_url}">
             </a>
             <a href="${link}" class="right" target="_blank">
-              <time ts="${item.date}" title="${fulldate}">${timeago}</time>
+              <time title="${fulldate}">${timeago}</time>
             </a>
             <div class="card-owner">
               <a class="owner" href="${profile}" target="_blank">${item.owner.username}</a>
@@ -177,11 +186,11 @@ class Main {
           <div class="card-action">
             <a class="btn-link likeIcon" data-id="${item.id}" data-code="${item.code}">
               <i class="material-icons">${likeIcon}</i>
-              <span class="likes">${item.likes.count}</span>
+              <span>${item.likes.count}</span>
             </a>
             <a class="btn-link commentIcon">
               <i class="material-icons">chat_bubble_outline</i>
-              <span class="comments">${item.comments.count}</span>
+              <span>${item.comments.count}</span>
             </a>
           </div>
         </div>
@@ -190,21 +199,7 @@ class Main {
     });
     $container.html(html);
 
-    $container.isotope({
-      sortBy: this.sortBy,
-      sortAscending: this.sortOrder,
-      getSortData: {
-        date: e => {
-          return +$(e).find('time').attr('ts');
-        },
-        likes: e => {
-          return +$(e).find('.likes').text();
-        },
-        comments: e => {
-          return +$(e).find('.comments').text();
-        }
-      }
-    });
+    $container.isotope();
 
     $container.magnificPopup({
       delegate: '.mfp',
@@ -301,34 +296,79 @@ class Main {
     } else {
       return;
     }
-    $('#feedItems').isotope({
-      sortBy: this.sortBy,
-      sortAscending: this.sortOrder
-    });
+    this._sortItems(this.currentItems);
+    this.setItemContent();
   }
 
   filterFeed(e) {
     clearTimeout(this.filterTimer);
-    this.filterTimer = setTimeout(() => this._filterFeed(e), 200);
+    this.filterTimer = setTimeout(() => this._filterFeed(e), 500);
+  }
+
+  searchFeed() {
+    clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this._searchFeed(), 500);
+  }
+
+  _matchFeed(items, regexp) {
+    return items.filter(item => {
+      let str = item.caption + item.owner.username + 
+        (item.location ? item.location.name : '');
+      return regexp.test(str);
+    });
   }
 
   _filterFeed(e) {
-    let search = $(e.target).val();
-    if (search) {
-      if (this.searchQuery === search) {
+    let filter = $(e.target).val();
+    if (filter) {
+      if (this.filterQuery === filter) {
         return;
-      } else if (!this.searchQuery) {
-        this.setItemContent(true);
       }
-      this.searchQuery = search;
-      let regexp = new RegExp(search, 'i');
-      $('#feedItems').isotope({
-        filter: (items, item) => $(item).text().match(regexp)
-      });
-    } else if (this.searchQuery) {
-      this.searchQuery = null;
+      this.filterQuery = filter;
+      let regexp = new RegExp(filter, 'i');
+      this.oldItems = this.currentItems.slice();
+      this._sortItems(this._matchFeed(this.currentItems, regexp));
+      this.setItemContent();
+    } else if (this.filterQuery) {
+      this.filterQuery = null;
+      this.currentItems = this.oldItems.slice();
+      this.oldItems = null;
       this.setItemContent();
     }
+  }
+
+  _searchFeed() {
+    let search = $('#searchFeed').val();
+    let liked = $('#searchLiked').prop('checked');
+    if (search || liked) {
+      if (this.searchQuery === search) {
+        return;
+      }
+      let regexp = new RegExp(search, 'i');
+      DB.g(null).then(items => {
+        delete items.options;
+        let dates = Object.keys(items).reverse();
+        let result = [];
+        dates.forEach(date => {
+          result = result.concat(this._matchFeed(items[date], regexp));
+        });
+        if (liked) {
+          result = result.filter(item => item.likes.viewer_has_liked);
+        }
+        if (search) {
+          this.searchQuery = search;
+        }
+        this._sortItems(result);
+        this.setItemContent();
+      });
+    } else if (this.searchQuery) {
+      this.resetSearch();
+    }
+  }
+
+  resetSearch() {
+    this.searchQuery = null;
+    this.loadFeed(this.currentKey);
   }
 }
 
