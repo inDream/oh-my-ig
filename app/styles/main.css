@@ -25,6 +25,10 @@
   cursor: pointer;
 }
 
+#feedItems .col.s12 {
+    width: 95%;
+  }
+
 @media only screen and (min-width: 601px) {
   #feedItems .col.m6 {
     width: 48%;
@@ -33,7 +37,7 @@
 
 @media only screen and (min-width: 993px) {
   #feedItems .col.l4 {
-    width: 32%;
+    width: 32.6%;
   }
 }
 
@@ -98,6 +102,17 @@ body {
 /* Magnific Popup */
 .mfp-title {
   padding-right: 50px;
+}
+
+.mfp-caption {
+  width: 80%;
+  max-width: 600px;
+  max-height: 600px;
+  overflow-y: auto;
+  word-break: break-all;
+  background: #fafafa;
+  padding: 15px;
+  margin: 0 auto;
 }
 
 .card-video {

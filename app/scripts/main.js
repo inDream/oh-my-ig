@@ -235,7 +235,20 @@ class Main {
   }
 
   setItemEvents() {
-    $('.likeIcon').click((e) => {
+    $('.caption').click(e => {
+      let $e = $(e.currentTarget);
+      if ($e.height() > 80) {
+        let caption = $e.text().replace(/\n/g, '<br>');
+        $.magnificPopup.open({
+          items: {
+            src: `<div class="mfp-caption">${caption}</div>`,
+            type: 'inline'
+          }
+        });
+      }
+    });
+
+    $('.likeIcon').click(e => {
       let $e = $(e.currentTarget);
       let id = $e.data('id');
       let liked = $e.find('i').text() === 'favorite';
