@@ -5,10 +5,18 @@ Provide what you expected from Instagram.
 - Auto sync feeds
 - Display feeds
   - Auto reload & Pagination
-  - Sort & Filter by date, likes and comments
-- Planned:
+  - Show photos & videos in lightbox
+  - Sort by date, likes and comments
+  - Search & Filter feeds
   - Notification about new feeds
-  - Export photos from profile
+- Planned:
+  - View & create comments
+  - Customize column layout
+  - Grouping users
+  - Theme
+  - Multi account
+  - Export photos & videos from profile
+  - Detect removed posts
 
 ## Develop Guide
 ```
