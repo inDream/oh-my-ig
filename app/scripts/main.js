@@ -58,6 +58,7 @@ class Main {
     $('#sortOrder').click();
     $('#sortFeed').click(this.sortFeed.bind(this));
     $('#filterFeed').keyup(this.filterFeed.bind(this));
+    $('.brand-logo').click(() => window.scrollTo(0, 0));
 
     // Fix for multiple dropdown activate
     $('.dropdown-button').click(e => {
@@ -76,7 +77,7 @@ class Main {
       });
 
     $('.pagination').click((e) => {
-      let $e = e.target.tagName == 'LI' ? $(e.target) :
+      let $e = e.target.tagName === 'LI' ? $(e.target) :
         $(e.target).parents('li');
       if ($e.not('.active')) {
         if ($e.is('.pagination-left') && this.currentPage > 1) {
@@ -89,6 +90,7 @@ class Main {
         } else {
           return;
         }
+        window.scrollTo(0, 0);
         this.setItemContent();
       }
     });
@@ -139,8 +141,13 @@ class Main {
       let profile = `${this.base}${item.owner.username}/`;
       let link = `${this.base}p/${item.code}/`;
       let likeIcon = `favorite${item.likes.viewer_has_liked ? '' : '_border'}`;
-      let popupLink = `<a class="mfp mfp-${item.is_video ? 'iframe' : 'image'}"
-        href="${item.is_video ? item.video_url : item.display_src}">`;
+      let itemCard = (item.is_video ? 
+        `<div class="card-image card-video">
+          <i class="material-icons">play_arrow</i>
+          <a class="mfp mfp-iframe" href="${item.video_url}">` : 
+        `<div class="card-image">
+          <a class="mfp mfp-image" href="${item.display_src}">`) + 
+        `<img src="${item.display_src}"></a></div>`;
 
       let template = `<div class="col s12 m6 l4">
         <div class="card">
@@ -153,13 +160,11 @@ class Main {
             </a>
             <div class="card-owner">
               <a class="owner" href="${profile}" target="_blank">${item.owner.username}</a>
+              <br>
               <a href="${this.base}explore/locations/${locationId}/" target="_blank">${location}</a>
             </div>
           </div>
-          <div class="card-image ${item.is_video ? 'card-video': ''}">
-            ${item.is_video ? '<i class="material-icons">play_arrow</i>': ''}
-            ${popupLink}<img src="${item.display_src}"></a>
-          </div>
+          ${itemCard}
           <div class="card-content">
             <p class="caption">${caption}</p>
           </div>
@@ -219,7 +224,7 @@ class Main {
     $container.imagesLoaded()
       .progress(() => {
         count++;
-        if (count % Math.round(total / 10) == 0) {
+        if (count % Math.round(total / 10) === 0) {
           $container.isotope('layout');
         }
       });
@@ -232,13 +237,13 @@ class Main {
     $('.likeIcon').click((e) => {
       let $e = $(e.currentTarget);
       let id = $e.data('id');
-      let liked = $e.find('i').text() == 'favorite';
+      let liked = $e.find('i').text() === 'favorite';
       let state = liked ? 'unlike' : 'like';
       let url = `web/likes/${id}/${state}/`;
       chrome.runtime.getBackgroundPage(w => {
         w.fetcher.post(url)
           .then(body => {
-            if (body.status == 'ok') {
+            if (body.status === 'ok') {
               $e.find('i').text(`favorite${liked ? '_border' : ''}`);
               let likes = $e.find('.likes').text();
               $e.find('.likes').text(+likes + (liked ? -1 : 1));
@@ -271,7 +276,7 @@ class Main {
     $('.pagination .pages').remove();
     let pages = this.totalPages;
     let html = new Array(pages).fill('').map((page, i) => {
-      let klass = (i + 1) == this.currentPage ? 'active' : '';
+      let klass = (i + 1) === this.currentPage ? 'active' : '';
       return `<li class="${klass} btn-link pages"><a>${i + 1}</a></li>`;
     }).join('');
     $('.pagination-left').after(html);
@@ -280,7 +285,7 @@ class Main {
   sortFeed(e) {
     let $e = $(e.target);
     let sortBy = $e.data('sort');
-    if ($e.attr('id') == 'sortOrder') {
+    if ($e.attr('id') === 'sortOrder') {
       this.sortOrder = !this.sortOrder;
     } else if (sortBy) {
       this.sortBy = sortBy;

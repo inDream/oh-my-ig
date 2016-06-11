@@ -4,5 +4,6 @@ temp
 dist
 .sass-cache
 app/bower_components
+app/scripts/libs
 test/bower_components
 package

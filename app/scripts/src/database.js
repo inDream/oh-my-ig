@@ -29,9 +29,9 @@ class DB {
           let ids = old.map(item => item.id);
           items = items.filter(item => {
             let oid = ids.indexOf(item.id);
-            if (oid == -1) {
+            if (oid === -1) {
               return true;
-            } else if (JSON.stringify(item) != JSON.stringify(old[oid])) {
+            } else if (JSON.stringify(item) !== JSON.stringify(old[oid])) {
               old[oid] = item;
               updated++;
               return false;

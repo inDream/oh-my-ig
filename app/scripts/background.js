@@ -62,9 +62,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 chrome.webRequest.onBeforeSendHeaders.addListener(details => {
-  if (details.tabId == -1) {
+  if (details.tabId === -1) {
     details.requestHeaders.forEach(header => {
-      if (header.name == 'Origin') {
+      if (header.name === 'Origin') {
         header.value = 'https://www.instagram.com/';
       }
     });

@@ -13,7 +13,7 @@ gulp.task('extras', () => {
     'app/*.*',
     'app/scripts/**/*',
     'app/_locales/**',
-    '!app/*.html',
+    '!app/*.html'
   ], {
     base: 'app',
     dot: true
@@ -56,7 +56,7 @@ gulp.task('images', () => {
 gulp.task('html',  () => {
   return gulp.src('app/*.html')
     .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
-    // .pipe($.if('*.js', $.uglify()))
+    .pipe($.if('*.js', $.uglify()))
     .pipe($.if('*.css', $.cleanCss({compatibility: '*'})))
     .pipe($.if('*.html', $.htmlmin({removeComments: true, collapseWhitespace: true})))
     .pipe(gulp.dest('dist'));
@@ -73,7 +73,7 @@ gulp.task('watch', ['copy', 'lint', 'html'], () => {
     'app/images/**/*',
     'app/styles/**/*',
     'app/_locales/**/*.json',
-    '!app/scripts/libs/*.js',
+    '!app/scripts/libs/*.js'
   ]).on('change', $.livereload.reload);
 
   gulp.watch(['app/scripts/**/*.js', '!app/scripts/libs/*.js'], ['lint']);
