@@ -42,7 +42,7 @@ chrome.alarms.onAlarm.addListener(alerm => {
       fetcher.auto(1);
       break;
     case 'sync':
-      fetcher.auto();
+      fetcher.auto(options.syncCount);
       break;
   }
 });
@@ -50,7 +50,7 @@ chrome.alarms.onAlarm.addListener(alerm => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch(request.action) {
     case 'sync':
-      fetcher.auto();
+      fetcher.auto(options.syncCount);
       break;
     case 'saveOptions':
       options = request.data;

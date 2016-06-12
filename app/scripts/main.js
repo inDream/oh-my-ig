@@ -27,6 +27,9 @@ class Main {
     this.searchQuery = null;
     this.sortBy = 'date';
     this.sortOrder = false;
+
+    this.fetcher = null;
+    chrome.runtime.getBackgroundPage(w => {this.fetcher = w.fetcher});
   }
 
   _addDates(items) {
@@ -186,11 +189,11 @@ class Main {
           <div class="card-action">
             <a class="btn-link likeIcon" data-id="${item.id}" data-code="${item.code}">
               <i class="material-icons">${likeIcon}</i>
-              <span>${item.likes.count}</span>
+              <span class="likes">${item.likes.count}</span>
             </a>
             <a class="btn-link commentIcon">
               <i class="material-icons">chat_bubble_outline</i>
-              <span>${item.comments.count}</span>
+              <span class="comments">${item.comments.count}</span>
             </a>
           </div>
         </div>
@@ -252,37 +255,16 @@ class Main {
       let $e = $(e.currentTarget);
       let id = $e.data('id');
       let liked = $e.find('i').text() === 'favorite';
-      let state = liked ? 'unlike' : 'like';
-      let url = `web/likes/${id}/${state}/`;
-      chrome.runtime.getBackgroundPage(w => {
-        w.fetcher.post(url)
-          .then(body => {
-            if (body.status === 'ok') {
-              $e.find('i').text(`favorite${liked ? '_border' : ''}`);
-              let likes = $e.find('.likes').text();
-              $e.find('.likes').text(+likes + (liked ? -1 : 1));
-            }
-          })
-          .then(() => {
-            let code = $e.data('code');
-            w.fetcher.getJSON(`p/${code}/?__a=1`)
-              .then(body => {
-                if (body.media) {
-                  let found = false;
-                  let newItems = this.currentItems.map(item => {
-                    if (item.id === body.media.id) {
-                      found = true;
-                      return body.media;
-                    }
-                    return item;
-                  });
-                  if (found) {
-                    return DB.s({[this.currentKey]: newItems});
-                  }
-                }
-              })
-          });
-      });
+      let code = $e.data('code');
+      new Media({id: id, code: code, fetcher: this.fetcher})
+        .like(liked)
+        .then(res => {
+          if (res) {
+            $e.find('i').text(`favorite${liked ? '_border' : ''}`);
+            $e.find('.likes').text(res.likes.count);
+            $e.find('.comments').text(res.comments.count);
+          }
+        });
     });
   }
 
