@@ -32,25 +32,32 @@ class Main {
     chrome.runtime.getBackgroundPage(w => {this.fetcher = w.fetcher});
   }
 
-  _addDates(items) {
-    items.forEach(item => {
-      let d = moment(item.key * 100000);
-      d = d.format('DD/MM/YYYY');
-      let tempate = `<a data-date="${item.key}" class="collection-item">
-      ${d}<span class="new badge">${item.count}</span></a>`;
-      $('#feedDates').append(tempate);
-    });
-    $('.dropdown-button').dropdown();
-  }
-
-  init() {
-    DB.g(null).then(items => {
+  addDates() {
+    return DB.g(null).then(items => {
       delete items.options;
       let dates = Object.keys(items).reverse();
       dates = dates.map(date => {
         return {key: date, count: items[date].length};
       });
       this._addDates(dates);
+      return dates;
+    });
+  }
+
+  _addDates(items) {
+    let html = '';
+    items.forEach(item => {
+      let d = moment(item.key * 100000);
+      d = d.format('DD/MM/YYYY');
+      html += `<a data-date="${item.key}" class="collection-item">
+      ${d}<span class="new badge">${item.count}</span></a>`;
+    });
+    $('#feedDates').html(html);
+    $('.dropdown-button').dropdown();
+  }
+
+  init() {
+    this.addDates().then(dates => {
       this.loadFeed(dates[0].key);
     });
 
@@ -105,6 +112,7 @@ class Main {
   }
 
   autoReload() {
+    this.addDates();
     DB.g(this.currentKey)
       .then(items => {
         let newItems = items.length - this.currentItems.length;
@@ -149,56 +157,8 @@ class Main {
     let html = '';
     let $container = $('#feedItems');
     $container.empty().isotope('destroy');
-    items.forEach(item => {
-      let location = item.location ? item.location.name : '';
-      let locationId = item.location ? item.location.id : '';
-      let date = moment(item.date * 1000);
-      let timeago = date.fromNow(true);
-      let fulldate = date.format('LLLL');
-      let caption = item.caption || '';
-      let profile = `${this.base}${item.owner.username}/`;
-      let link = `${this.base}p/${item.code}/`;
-      let likeIcon = `favorite${item.likes.viewer_has_liked ? '' : '_border'}`;
-      let itemCard = (item.is_video ? 
-        `<div class="card-image card-video">
-          <i class="material-icons">play_arrow</i>
-          <a class="mfp mfp-iframe" href="${item.video_url}">` : 
-        `<div class="card-image">
-          <a class="mfp mfp-image" href="${item.display_src}">`) + 
-        `<img src="${item.display_src}"></a></div>`;
-
-      let template = `<div class="col s12 m6 l4">
-        <div class="card">
-          <div class="card-content card-header">
-            <a class="left card-profile">
-              <img src="${item.owner.profile_pic_url}">
-            </a>
-            <a href="${link}" class="right" target="_blank">
-              <time title="${fulldate}">${timeago}</time>
-            </a>
-            <div class="card-owner">
-              <a class="owner" href="${profile}" target="_blank">${item.owner.username}</a>
-              <br>
-              <a href="${this.base}explore/locations/${locationId}/" target="_blank">${location}</a>
-            </div>
-          </div>
-          ${itemCard}
-          <div class="card-content">
-            <p class="caption">${caption}</p>
-          </div>
-          <div class="card-action">
-            <a class="btn-link likeIcon" data-id="${item.id}" data-code="${item.code}">
-              <i class="material-icons">${likeIcon}</i>
-              <span class="likes">${item.likes.count}</span>
-            </a>
-            <a class="btn-link commentIcon">
-              <i class="material-icons">chat_bubble_outline</i>
-              <span class="comments">${item.comments.count}</span>
-            </a>
-          </div>
-        </div>
-      </div>`;
-      html += template;
+    items.forEach((item, i) => {
+      html += Media.template(item, start + i);
     });
     $container.html(html);
 
@@ -253,10 +213,9 @@ class Main {
 
     $('.likeIcon').click(e => {
       let $e = $(e.currentTarget);
-      let id = $e.data('id');
-      let liked = $e.find('i').text() === 'favorite';
-      let code = $e.data('code');
-      new Media({id: id, code: code, fetcher: this.fetcher})
+      let item = this.currentItems[$e.parents('.card').data('id')];
+      let liked = item.likes.viewer_has_liked;
+      new Media({item: item, fetcher: this.fetcher})
         .like(liked)
         .then(res => {
           if (res) {
@@ -313,8 +272,16 @@ class Main {
     });
   }
 
+  trim(str) {
+    str = str.replace(/^\s+|\s+$/g, '');
+    if (str.indexOf(' ') > -1) {
+      str = str.split(' ').join('|');
+    }
+    return str
+  }
+
   _filterFeed(e) {
-    let filter = $(e.target).val();
+    let filter = this.trim($(e.target).val());
     if (filter) {
       if (this.filterQuery === filter) {
         return;
@@ -333,7 +300,7 @@ class Main {
   }
 
   _searchFeed() {
-    let search = $('#searchFeed').val();
+    let search = this.trim($('#searchFeed').val());
     let liked = $('#searchLiked').prop('checked');
     if (search || liked) {
       if (this.searchQuery === search) {

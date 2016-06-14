@@ -1,8 +1,60 @@
 class Media {
-  constructor(media) {
-    this.id = media.id;
-    this.code = media.code;
-    this.fetcher = media.fetcher;
+  constructor(options) {
+    this.id = options.item.id;
+    this.code = options.item.code;
+    this.fetcher = options.fetcher;
+  }
+
+  static template(item, i) {
+    let base = 'https://www.instagram.com/';
+    let location = item.location ? item.location.name : '';
+    let locationId = item.location ? item.location.id : '';
+    let date = moment(item.date * 1000);
+    let timeago = date.fromNow(true);
+    let fulldate = date.format('LLLL');
+    let caption = item.caption || '';
+    let profile = `${base}${item.owner.username}/`;
+    let link = `${base}p/${item.code}/`;
+    let likeIcon = `favorite${item.likes.viewer_has_liked ? '' : '_border'}`;
+    let itemCard = (item.is_video ? 
+      `<div class="card-image card-video">
+        <i class="material-icons">play_arrow</i>
+        <a class="mfp mfp-iframe" href="${item.video_url}">` : 
+      `<div class="card-image">
+        <a class="mfp mfp-image" href="${item.display_src}">`) + 
+      `<img src="${item.display_src}"></a></div>`;
+
+    return `<div class="col s12 m6 l4">
+      <div class="card" data-id="${i}">
+        <div class="card-content card-header">
+          <a class="left card-profile">
+            <img src="${item.owner.profile_pic_url}">
+          </a>
+          <a href="${link}" class="right" target="_blank">
+            <time title="${fulldate}">${timeago}</time>
+          </a>
+          <div class="card-owner">
+            <a class="owner" href="${profile}" target="_blank">${item.owner.username}</a>
+            <br>
+            <a href="${base}explore/locations/${locationId}/" target="_blank">${location}</a>
+          </div>
+        </div>
+        ${itemCard}
+        <div class="card-content">
+          <p class="caption">${caption}</p>
+        </div>
+        <div class="card-action">
+          <a class="btn-link likeIcon" data-id="${item.id}" data-code="${item.code}">
+            <i class="material-icons">${likeIcon}</i>
+            <span class="likes">${item.likes.count}</span>
+          </a>
+          <a class="btn-link commentIcon">
+            <i class="material-icons">chat_bubble_outline</i>
+            <span class="comments">${item.comments.count}</span>
+          </a>
+        </div>
+      </div>
+    </div>`;
   }
 
   like(liked) {

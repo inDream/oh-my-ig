@@ -21,14 +21,14 @@
     <div class="navbar-fixed">
       <nav>
         <div class="nav-wrapper">
-          <a href="#!" class="brand-logo">Oh My IG</a>
-          <a href="#" data-activates="sideNav" class="button-collapse"><i class="material-icons">menu</i></a>
+          <a class="btn-link brand-logo">Oh My IG</a>
+          <a data-activates="sideNav" class="btn-link button-collapse"><i class="material-icons">menu</i></a>
           <ul class="right hide-on-med-and-down">
-            <li><a class='dropdown-button btn' href='#' data-activates='feedDates'>Select Date (<span class="titleDate"></span>)</a></li>
+            <li><a class="dropdown-button btn btn-link" data-activates="feedDates">Select Date (<span class="titleDate"></span>)</a></li>
             <li><input id="filterFeed" placeholder="Filter"></li>
           </ul>
           <ul class="side-nav" id="sideNav">
-            <li><a class='dropdown-button btn' href='#' data-activates='feedDates'>Select Date (<span class="titleDate"></span>)</a></li>
+            <li><a class="dropdown-button btn btn-link" data-activates="feedDates">Select Date (<span class="titleDate"></span>)</a></li>
           </ul>
         </div>
       </nav>
@@ -59,7 +59,7 @@
         <button id="resetSearch" class="waves-effect waves-light btn" type="reset">Reset</button>
       </form>
       <div class="divider"></div>
-      <div class="section row">
+      <div class="section">
         <ul class="pagination center">
           <li class="pagination-left waves-effect">
             <a><i class="material-icons">chevron_left</i></a>
@@ -68,7 +68,7 @@
             <a><i class="material-icons">chevron_right</i></a>
           </li>
         </ul>
-        <div id="feedItems" class="col s12"></div>
+        <div id="feedItems" class="row"></div>
         <ul class="pagination center">
           <li class="pagination-left waves-effect">
             <a><i class="material-icons">chevron_left</i></a>
