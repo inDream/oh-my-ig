@@ -20,10 +20,6 @@
   text-transform: none;
 }
 
-.dropdown-content.active {
-  position: fixed !important;
-}
-
 #feedDates .badge {
   position: absolute;
   margin-left: 0;
@@ -36,7 +32,7 @@
 
 body {
   font-size: 15px;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-family: 'Montserrat', 'Source Han Sans TW', 'Noto Sans CJK TW', Arial, Helvetica, sans-serif;
 }
 
 .pagination li.pages {
@@ -88,7 +84,7 @@ body {
   color: #ed4956 !important;
 }
 
-.commentIcon {
+.commentIcon, .reloadBtn {
   color: #3f51b5 !important;
 }
 

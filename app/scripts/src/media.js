@@ -31,7 +31,7 @@ class Media {
             <img src="${item.owner.profile_pic_url}">
           </a>
           <a href="${link}" class="right" target="_blank">
-            <time title="${fulldate}">${timeago}</time>
+            <time data-date="${+date}" title="${fulldate}">${timeago}</time>
           </a>
           <div class="card-owner">
             <a class="owner" href="${profile}" target="_blank">${item.owner.username}</a>
@@ -51,6 +51,9 @@ class Media {
           <a class="btn-link commentIcon">
             <i class="material-icons">chat_bubble_outline</i>
             <span class="comments">${item.comments.count}</span>
+          </a>
+          <a class="btn-link reloadBtn">
+            <i class="material-icons">refresh</i>
           </a>
         </div>
       </div>
@@ -89,5 +92,12 @@ class Media {
           return body.media;
         }
       });
+  }
+
+  static updateTimeElements() {
+    $('time').each((i, e) => {
+      let date = moment(+e.dataset.date);
+      e.textContent = date.fromNow(true);
+    });
   }
 }

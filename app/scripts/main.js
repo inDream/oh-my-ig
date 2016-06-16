@@ -109,6 +109,8 @@ class Main {
         this.setItemContent();
       }
     });
+
+    setInterval(Media.updateTimeElements, 60 * 1000);
   }
 
   autoReload() {
@@ -223,6 +225,19 @@ class Main {
             $e.find('.likes').text(res.likes.count);
             $e.find('.comments').text(res.comments.count);
           }
+        });
+    });
+
+    $('.reloadBtn').click(e => {
+      let $e = $(e.currentTarget);
+      let id = $e.parents('.card').data('id');
+      let item = this.currentItems[id];
+      new Media({item: item, fetcher: this.fetcher})
+        .updateCache()
+        .then(res => {
+          this.currentItems[id] = res;
+          this._sortItems(this.currentItems);
+          this.setItemContent();
         });
     });
   }
