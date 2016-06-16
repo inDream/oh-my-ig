@@ -126,6 +126,7 @@ class Fetcher {
         });
       } else {
         chrome.browserAction.setBadgeText({text: ''});
+        return true;
       }
     });
   }
