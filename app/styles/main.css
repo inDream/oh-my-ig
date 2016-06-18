@@ -32,7 +32,7 @@
 
 body {
   font-size: 15px;
-  font-family: 'Montserrat', 'Source Han Sans TW', 'Noto Sans CJK TW', Arial, Helvetica, sans-serif;
+  font-family: 'Montserrat', 'Source Han Sans TW', 'Noto Sans CJK TC', Arial, Helvetica, sans-serif;
 }
 
 .pagination li.pages {
@@ -84,7 +84,7 @@ body {
   color: #ed4956 !important;
 }
 
-.commentIcon, .reloadBtn {
+.commentIcon, .reloadBtn, .profileBtn {
   color: #3f51b5 !important;
 }
 

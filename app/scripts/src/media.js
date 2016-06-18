@@ -35,8 +35,10 @@ class Media {
           </a>
           <div class="card-owner">
             <a class="owner" href="${profile}" target="_blank">${item.owner.username}</a>
-            <br>
-            <a href="${base}explore/locations/${locationId}/" target="_blank">${location}</a>
+            <span class="location">
+              <br>
+              <a href="${base}explore/locations/${locationId}/" target="_blank">${location}</a>
+            </span>
           </div>
         </div>
         ${itemCard}

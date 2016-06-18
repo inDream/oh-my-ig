@@ -16,6 +16,7 @@
     <!-- build:css styles/main.css -->
     <link href="styles/main.css" rel="stylesheet">
     <!-- endbuild -->
+    <style id="feedStyle"></style>
   </head>
   <body>
     <div class="navbar-fixed">
@@ -58,6 +59,38 @@
         <label for="searchLiked">Liked</label>
         <button id="resetSearch" class="waves-effect waves-light btn" type="reset">Reset</button>
       </form>
+      <div class="row">
+        <h5 class="col">Display Options: </h5>
+        <div class="input-field col s3 m1">
+          <input id="noOfColumns" type="number" value="3" class="active input-field validate" />
+          <label for="noOfColumns">No. of columns: </label>
+        </div>
+        <h6 class="col">Hide: </h6>
+        <div class="input-field col">
+          <input id="displayUsername" data-hide=".owner" class="displayOpts" type="checkbox" />
+          <label for="displayUsername">Username</label>
+        </div>
+        <div class="input-field col">
+          <input id="displayLocation" data-hide=".location" class="displayOpts" type="checkbox" />
+          <label for="displayLocation">Location</label>
+        </div>
+        <div class="input-field col">
+          <input id="displayProfile" data-hide=".card-profile" class="displayOpts" type="checkbox" />
+          <label for="displayProfile">Profile</label>
+        </div>
+        <div class="input-field col">
+          <input id="displayTime" data-hide="time" class="displayOpts" type="checkbox" />
+          <label for="displayTime">Time</label>
+        </div>
+        <div class="input-field col">
+          <input id="displayCaption" data-hide=".caption" class="displayOpts" type="checkbox" />
+          <label for="displayCaption">Caption</label>
+        </div>
+        <div class="input-field col">
+          <input id="displayActions" data-hide=".card-action" class="displayOpts" type="checkbox" />
+          <label for="displayActions">Actions</label>
+        </div>
+      </div>
       <div class="divider"></div>
       <div class="section">
         <ul class="pagination center">

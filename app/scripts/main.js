@@ -73,6 +73,7 @@ class Main {
     $('#searchFeed').keyup(this.searchFeed.bind(this));
     $('#searchLiked').click(this.searchFeed.bind(this));
     $('#resetSearch').click(this.resetSearch.bind(this));
+    $('#noOfColumns, .displayOpts').change(this.setDisplayOpts.bind(this));
     $('.brand-logo').click(() => window.scrollTo(0, 0));
 
     // Fix for multiple dropdown activate
@@ -346,6 +347,14 @@ class Main {
   resetSearch() {
     this.searchQuery = null;
     this.loadFeed(this.currentKey);
+  }
+
+  setDisplayOpts() {
+    let width = 100 / $('#noOfColumns').val();
+    let hide = Array.from($('.displayOpts:checked')).map(e => e.dataset.hide);
+    let hideCSS = hide.length ? hide.join(', ') + '{display: none;}' : '';
+    $('#feedStyle').text(`#feedItems .col {width: ${width}%;} ${hideCSS}`);
+    $('#feedItems').isotope('layout');
   }
 }
 
