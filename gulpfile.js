@@ -110,8 +110,7 @@ gulp.task('copy', () => {
   return gulp.src([
     'node_modules/chrome-promise/chrome-promise.js',
     'node_modules/moment/min/moment.min.js',
-    'node_modules/isotope-layout/dist/isotope.pkgd.min.js',
-    'node_modules/whatwg-fetch/fetch.js'
+    'node_modules/isotope-layout/dist/isotope.pkgd.min.js'
     ])
   .pipe(gulp.dest('app/scripts/libs'))
   .pipe(gulp.dest('dist/scripts/libs'));

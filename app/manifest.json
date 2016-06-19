@@ -11,7 +11,6 @@
   "background": {
     "scripts": [
       "scripts/chromereload.js",
-      "scripts/libs/fetch.js",
       "scripts/libs/chrome-promise.js",
       "scripts/libs/moment.min.js",
       "scripts/src/fetcher.js",
