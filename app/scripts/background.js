@@ -1,5 +1,6 @@
 'use strict';
 
+let base = 'https://www.instagram.com/';
 let options = null;
 let fetcher = null;
 
@@ -65,13 +66,22 @@ chrome.webRequest.onBeforeSendHeaders.addListener(details => {
   if (details.tabId === -1) {
     details.requestHeaders.forEach(header => {
       if (header.name === 'Origin') {
-        header.value = 'https://www.instagram.com/';
+        header.value = base;
       }
     });
   }
-  details.requestHeaders.push({
-    name: 'Referer',
-    value: 'https://www.instagram.com/'
+  let referer = false;
+  details.requestHeaders.forEach(header => {
+    if (header.name === 'Referer') {
+      header.value = base;
+      referer = true;
+    }
   });
+  if (!referer) {
+    details.requestHeaders.push({
+      name: 'Referer',
+      value: base
+    });
+  }
   return {requestHeaders: details.requestHeaders};
-}, {urls: ['https://www.instagram.com/*']}, ['blocking', 'requestHeaders']);
+}, {urls: [base + '*']}, ['blocking', 'requestHeaders']);

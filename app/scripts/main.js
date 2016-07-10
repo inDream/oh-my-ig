@@ -92,6 +92,12 @@ class Main {
         this.feedPerPage = options.feedPerPage;
       });
 
+    chrome.notifications.onClicked.addListener(() => {
+      chrome.tabs.getCurrent(tab => {
+        chrome.tabs.update(tab.id, {active: true});
+      });
+    });
+
     $('.pagination').click((e) => {
       let $e = e.target.tagName === 'LI' ? $(e.target) :
         $(e.target).parents('li');
@@ -106,8 +112,8 @@ class Main {
         } else {
           return;
         }
-        window.scrollTo(0, 0);
         this.setItemContent();
+        window.scrollTo(0, $('.section').offset().top - $('nav').height());
       }
     });
 
@@ -165,7 +171,7 @@ class Main {
     });
     $container.html(html);
 
-    $container.isotope();
+    $container.isotope().isotope('layout');
 
     $container.magnificPopup({
       delegate: '.mfp',
