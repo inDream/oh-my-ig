@@ -71,7 +71,7 @@ class Main {
     $('#sortFeed').click(this.sortFeed.bind(this));
     $('#filterFeed').keyup(this.filterFeed.bind(this));
     $('#searchFeed').keyup(this.searchFeed.bind(this));
-    $('#searchLiked').click(this.searchFeed.bind(this));
+    $('#searchLiked, #searchTagged').click(this.searchFeed.bind(this));
     $('#resetSearch').click(this.resetSearch.bind(this));
     $('#noOfColumns, .displayOpts').change(this.setDisplayOpts.bind(this));
     $('.brand-logo').click(() => window.scrollTo(0, 0));
@@ -287,9 +287,12 @@ class Main {
   }
 
   _matchFeed(items, regexp) {
+    let tagged = $('#searchTagged').prop('checked');
     return items.filter(item => {
-      let str = item.caption + item.owner.username + 
-        (item.location ? item.location.name : '');
+      let str = item.caption + item.owner.username +
+        (item.location ? item.location.name : '') +
+        (!tagged || !item.usertags.nodes.length ? '' :
+        item.usertags.nodes.map(u => u.user ? u.user.username : '').join(' '));
       return regexp.test(str);
     });
   }
