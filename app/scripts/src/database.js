@@ -2,6 +2,29 @@ chrome.promise = new ChromePromise();
 
 const sL = chrome.promise.storage.local;
 class DB {
+  constructor() {
+    this.cached = {};
+    setInterval(() => {
+      for (let key in this.cached) {
+        delete this.cached[key];
+      }
+    }, 60 * 1000);
+  }
+
+  gCached(key) {
+    // Get item with cached result
+    let ckey = key ? key : '_all_';
+    if (this.cached[ckey]) {
+      return Promise.resolve(this.cached[ckey]);
+    } else {
+      return sL.get(key)
+        .then(items => {
+          this.cached[ckey] = items;
+          return key ? items[key] : items;
+        });
+    }
+  }
+
   static g(key) {
     // Get all items or item with specific key
     return sL.get(key)

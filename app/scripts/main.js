@@ -18,6 +18,8 @@ moment.updateLocale('en', {
 
 class Main {
   constructor() {
+    this.db = new DB();
+
     this.base = 'https://www.instagram.com/';
     this.currentKey = null;
     this.currentItems = null;
@@ -332,7 +334,7 @@ class Main {
         return;
       }
       let regexp = new RegExp(search, 'i');
-      DB.g(null).then(items => {
+      this.db.gCached(null).then(items => {
         delete items.options;
         let dates = Object.keys(items).reverse();
         let result = [];
