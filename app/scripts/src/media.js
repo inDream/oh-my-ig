@@ -54,7 +54,7 @@ class Media {
             <i class="material-icons">chat_bubble_outline</i>
             <span class="comments">${item.comments.count}</span>
           </a>
-          <a class="btn-link reloadBtn">
+          <a class="btn-link reloadBtn" title="Reload">
             <i class="material-icons">refresh</i>
           </a>
         </div>

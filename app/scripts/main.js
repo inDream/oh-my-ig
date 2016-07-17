@@ -301,7 +301,7 @@ class Main {
   _matchFeed(items, regexp) {
     let tagged = $('#searchTagged').prop('checked');
     return items.filter(item => {
-      let str = item.caption + item.owner.username +
+      let str = item.caption + item.owner.username + item.owner.full_name +
         (item.location ? item.location.name : '') +
         (!tagged || !item.usertags.nodes.length ? '' :
         item.usertags.nodes.map(u => u.user ? u.user.username : '').join(' '));
@@ -310,7 +310,7 @@ class Main {
   }
 
   trim(str) {
-    str = str.replace(/^\s+|\s+$/g, '');
+    str = str.replace(/^\s+|\s+$/g, '').replace(/\s{2,}/g, ' ');
     if (str.indexOf(' ') > -1) {
       str = str.split(' ').join('|');
     }
@@ -377,6 +377,8 @@ class Main {
       label += 'search';
     }
     A.e('feed', 'click-reset', label);
+    $('#filterFeed').val('');
+    this.filterQuery = null;
     this.searchQuery = null;
     this.loadFeed(this.currentKey);
   }
