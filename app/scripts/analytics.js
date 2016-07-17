@@ -13,8 +13,15 @@ if (typeof Fetcher === 'undefined') {
 } else {
   chrome.runtime.onInstalled.addListener(o => {
     if (o.reason !== 'chrome_update') {
-      ga('send', 'event', 'extension', o.reason, 
-        chrome.runtime.getManifest().version, null, {nonInteraction: 1});
+      A.e('extension', o.reason, chrome.runtime.getManifest().version, null,
+        {nonInteraction: 1});
     }
   });
+}
+
+class A {
+  static e(cat, action, label, value, options) {
+    ga('send', 'event', cat, action, label || null, value || null,
+      options || null);
+  }
 }

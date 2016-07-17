@@ -46,11 +46,16 @@ class Main {
     });
   }
 
+  _getDateLabel(key) {
+    let d = moment(key * 100000);
+    d = d.format('DD/MM/YYYY');
+    return d;
+  }
+
   _addDates(items) {
     let html = '';
     items.forEach(item => {
-      let d = moment(item.key * 100000);
-      d = d.format('DD/MM/YYYY');
+      let d = this._getDateLabel(item.key);
       html += `<a data-date="${item.key}" class="collection-item">
       ${d}<span class="new badge">${item.count}</span></a>`;
     });
@@ -67,6 +72,7 @@ class Main {
     $('#feedDates').on('click', 'a', (e) => {
       let date = $(e.currentTarget).data('date') + '';
       this.loadFeed(date);
+      A.e('feed', 'click-date', this._getDateLabel(date));
     });
 
     $('#sortOrder').click();
@@ -138,7 +144,8 @@ class Main {
             this.loadFeed(this.currentKey);
           }
         }
-      })
+      });
+    A.e('feed', 'auto-reload', this._getDateLabel(this.currentKey));
   }
 
   loadFeed(date) {
@@ -235,6 +242,7 @@ class Main {
             $e.find('.comments').text(res.comments.count);
           }
         });
+      A.e('feed', 'click-like', this._getDateLabel(item.date / 100));
     });
 
     $('.reloadBtn').click(e => {
@@ -248,6 +256,7 @@ class Main {
           this._sortItems(this.currentItems);
           this.setItemContent();
         });
+      A.e('feed', 'click-reload', this._getDateLabel(item.date / 100));
     });
   }
 
@@ -276,6 +285,7 @@ class Main {
     }
     this._sortItems(this.currentItems);
     this.setItemContent();
+    A.e('feed', 'sort', `${this.sortBy}-${this.sortOrder ? 'asc' : 'desc'}`);
   }
 
   filterFeed(e) {
@@ -318,6 +328,7 @@ class Main {
       this.oldItems = this.currentItems.slice();
       this._sortItems(this._matchFeed(this.currentItems, regexp));
       this.setItemContent();
+      A.e('feed', 'filter', filter.split('|').length);
     } else if (this.filterQuery) {
       this.filterQuery = null;
       this.currentItems = this.oldItems.slice();
@@ -343,9 +354,11 @@ class Main {
         });
         if (liked) {
           result = result.filter(item => item.likes.viewer_has_liked);
+          A.e('feed', 'search', 'liked');
         }
         if (search) {
           this.searchQuery = search;
+          A.e('feed', 'search', search.split('|').length);
         }
         this._sortItems(result);
         this.setItemContent();
@@ -356,6 +369,14 @@ class Main {
   }
 
   resetSearch() {
+    let label = '';
+    if (this.filterQuery) {
+      label += 'filter' + (this.searchQuery ? ' & ' : '');
+    }
+    if (this.searchQuery) {
+      label += 'search';
+    }
+    A.e('feed', 'click-reset', label);
     this.searchQuery = null;
     this.loadFeed(this.currentKey);
   }
@@ -366,6 +387,7 @@ class Main {
     let hideCSS = hide.length ? hide.join(', ') + '{display: none;}' : '';
     $('#feedStyle').text(`#feedItems .col {width: ${width}%;} ${hideCSS}`);
     $('#feedItems').isotope('layout');
+    A.e('feed', 'displayOpts', $('#noOfColumns').val() + '-' + hide.join('|'));
   }
 }
 
