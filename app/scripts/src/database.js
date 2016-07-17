@@ -4,16 +4,25 @@ const sL = chrome.promise.storage.local;
 class DB {
   constructor() {
     this.cached = {};
-    setInterval(() => {
-      for (let key in this.cached) {
-        delete this.cached[key];
-      }
-    }, 60 * 1000);
+    this.cleanTimer = null;
+  }
+
+  cleanCache() {
+    clearTimeout(this.cleanTimer);
+    this.cleanTimer = setTimeout(() => this._cleanCache(), 60 * 1000);
+  }
+
+  _cleanCache() {
+    let keys = Object.keys(this.cached);
+    for (let i = 0; i < keys.length; i++) {
+      delete this.cached[keys[i]];
+    }
   }
 
   gCached(key) {
     // Get item with cached result
     let ckey = key ? key : '_all_';
+    this.cleanCache();
     if (this.cached[ckey]) {
       return Promise.resolve(this.cached[ckey]);
     } else {
