@@ -129,20 +129,23 @@ class Main {
   }
 
   autoReload() {
-    this.addDates();
+    this.addDates().then(dates => {
+      if (dates[0].key !== this.currentKey &&
+        !this.searchQuery && !this.filterQuery) {
+        this.loadFeed(dates[0].key);
+      }
+    });
     DB.g(this.currentKey)
       .then(items => {
         let newItems = items.length - this.currentItems.length;
-        if (newItems > 0) {
+        if (newItems > 0 && !this.searchQuery && !this.filterQuery) {
           chrome.notifications.create('sync', {
             type: 'basic',
             iconUrl: 'images/icon-128.png',
             title: 'Oh My IG',
             message: `Synced ${newItems} new feed${newItems > 1 ? 's' : ''}.`
           });
-          if (!this.searchQuery && !this.filterQuery) {
-            this.loadFeed(this.currentKey);
-          }
+          this.loadFeed(this.currentKey);
         }
       });
     A.e('feed', 'auto-reload', this._getDateLabel(this.currentKey));
