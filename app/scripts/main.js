@@ -29,6 +29,7 @@ class Main {
     this.searchQuery = null;
     this.sortBy = 'date';
     this.sortOrder = false;
+    this.lastAct = null;
 
     this.fetcher = null;
     chrome.runtime.getBackgroundPage(w => {this.fetcher = w.fetcher});
@@ -70,6 +71,7 @@ class Main {
 
     // Event handler
     $('#feedDates').on('click', 'a', (e) => {
+      this.lastAct = +new Date();
       let date = $(e.currentTarget).data('date') + '';
       this.loadFeed(date);
       A.e('feed', 'click-date', this._getDateLabel(date));
@@ -107,6 +109,7 @@ class Main {
     });
 
     $('.pagination').click((e) => {
+      this.lastAct = +new Date();
       let $e = e.target.tagName === 'LI' ? $(e.target) :
         $(e.target).parents('li');
       if ($e.not('.active')) {
@@ -131,7 +134,8 @@ class Main {
   autoReload() {
     this.addDates().then(dates => {
       if (dates[0].key !== this.currentKey &&
-        !this.searchQuery && !this.filterQuery) {
+        !this.searchQuery && !this.filterQuery &&
+        new Date() - this.lastAct > 5 * 60 * 1000) {
         this.loadFeed(dates[0].key);
       }
     });
@@ -301,14 +305,14 @@ class Main {
     this.searchTimer = setTimeout(() => this._searchFeed(), 500);
   }
 
-  _matchFeed(items, regexp) {
+  _matchFeed(items, regexp, query) {
     let tagged = $('#searchTagged').prop('checked');
     return items.filter(item => {
       let str = item.caption + item.owner.username + item.owner.full_name +
         (item.location ? item.location.name : '') +
         (!tagged || !item.usertags.nodes.length ? '' :
         item.usertags.nodes.map(u => u.user ? u.user.username : '').join(' '));
-      return regexp.test(str);
+      return regexp.test(str) || item.owner.id === query;
     });
   }
 
@@ -329,7 +333,7 @@ class Main {
       this.filterQuery = filter;
       let regexp = new RegExp(filter, 'i');
       this.oldItems = this.currentItems.slice();
-      this._sortItems(this._matchFeed(this.currentItems, regexp));
+      this._sortItems(this._matchFeed(this.currentItems, regexp, filter));
       this.setItemContent();
       A.e('feed', 'filter', filter.split('|').length);
     } else if (this.filterQuery) {
@@ -353,7 +357,7 @@ class Main {
         let dates = Object.keys(items).reverse();
         let result = [];
         dates.forEach(date => {
-          result = result.concat(this._matchFeed(items[date], regexp));
+          result = result.concat(this._matchFeed(items[date], regexp, search));
         });
         if (liked) {
           result = result.filter(item => item.likes.viewer_has_liked);

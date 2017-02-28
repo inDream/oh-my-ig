@@ -60,6 +60,27 @@ class Fetcher {
   storeItem(items) {
     let temp = {};
     items.forEach(item => {
+      if (item.node) {
+        item = item.node;
+        item.date = item.taken_at_timestamp;
+        delete item.taken_at_timestamp;
+        item.caption = item.edge_media_to_caption.edges[0].node.text;
+        delete item.edge_media_to_caption;
+        item.likes = {
+          count: item.edge_media_preview_like.count,
+          viewer_has_liked: item.viewer_has_liked
+        };
+        delete item.edge_media_preview_like;
+        item.comments = {
+          count: item.edge_media_to_comment.count
+        }
+        delete item.edge_media_to_comment;
+        item.code = item.shortcode;
+        delete item.shortcode;
+        item.display_src = item.display_url;
+        delete item.display_url;
+      };
+      item.display_src = item.display_src.replace(/s\d+x\d+\//, '');
       let key = moment(item.date * 1000).startOf('day') / 100000;
       if (key) {
         if (temp[key] === undefined) {
@@ -90,8 +111,9 @@ class Fetcher {
         if (!feed) {
           return false;
         }
-        feed = feed[0].feed.media;
-        this.storeItem(feed.nodes);
+        feed = feed[0].feed ? feed[0].feed.media : 
+          feed[0].graphql.user.edge_web_feed_timeline;
+        this.storeItem(feed.nodes ? feed.nodes : feed.edges);
         this.token = data.config.csrf_token;
         this.lastCursor = feed.page_info.end_cursor;
         s = doc = null;

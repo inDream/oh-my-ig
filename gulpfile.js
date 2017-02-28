@@ -58,13 +58,28 @@ gulp.task('html',  () => {
     .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
     .pipe($.if('*.js', $.uglify()))
     .pipe($.if('*.css', $.cleanCss({compatibility: '*'})))
-    .pipe($.if('*.html', $.htmlmin({removeComments: true, collapseWhitespace: true})))
+    .pipe($.if('*.html', $.htmlmin({
+      collapseWhitespace: true,
+      minifyCSS: true,
+      minifyJS: true,
+      removeComments: true
+    })))
     .pipe(gulp.dest('dist'));
 });
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
-gulp.task('watch', ['copy', 'lint', 'html'], () => {
+gulp.task('copy', () => {
+  return gulp.src([
+    'node_modules/chrome-promise/chrome-promise.js',
+    'node_modules/moment/min/moment.min.js',
+    'node_modules/isotope-layout/dist/isotope.pkgd.min.js'
+    ])
+  .pipe(gulp.dest('app/scripts/libs'))
+  .pipe(gulp.dest('dist/scripts/libs'));
+});
+
+gulp.task('watch', gulp.series('copy', 'lint'), () => {
   $.livereload.listen();
 
   gulp.watch([
@@ -104,16 +119,6 @@ gulp.task('build', (cb) => {
     'copy', 'lint',
     ['html', 'images', 'extras'],
     'size', cb);
-});
-
-gulp.task('copy', () => {
-  return gulp.src([
-    'node_modules/chrome-promise/chrome-promise.js',
-    'node_modules/moment/min/moment.min.js',
-    'node_modules/isotope-layout/dist/isotope.pkgd.min.js'
-    ])
-  .pipe(gulp.dest('app/scripts/libs'))
-  .pipe(gulp.dest('dist/scripts/libs'));
 });
 
 gulp.task('default', ['clean'], cb => {

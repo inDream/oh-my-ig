@@ -21,6 +21,9 @@ if (typeof Fetcher === 'undefined') {
 
 class A {
   static e(cat, action, label, value, options) {
+    if (cat !== 'extension') {
+      return;
+    }
     ga('send', 'event', cat, action, label || null, value || null,
       options || null);
   }
