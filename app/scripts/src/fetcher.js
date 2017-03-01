@@ -81,7 +81,7 @@ class Fetcher {
         item.display_src = item.display_url;
         delete item.display_url;
       }
-      item.display_src = item.display_src.replace(/s\d+x\d+\//, '');
+      item.display_src = item.display_src.replace(/\w\d+x\d+\//, '');
       let key = moment(item.date * 1000).startOf('day') / 100000;
       if (key) {
         if (temp[key] === undefined) {
