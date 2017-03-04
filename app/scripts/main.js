@@ -175,15 +175,59 @@ class Main {
     this.currentPage = 1;
   }
 
+  _countItems(items) {
+    let count = 0;
+    items.forEach(e => {
+      count += e.display_urls ? e.display_urls.length : 1;
+    });
+    return count;
+  }
+
+  _getItems(items) {
+    let res = [];
+    let start = 0;
+    let page = 1;
+    for (let i = 0; i < items.length; i++) {
+      let e = items[i];
+      let len = e.display_urls ? e.display_urls.length : 1;
+      if (this._countItems(res) + len < this.feedPerPage) {
+        res.push(e);
+      } else {
+        if (this.currentPage !== page) {
+          start = i;
+          res = [];
+          page++;
+        } else {
+          break;
+        }
+      }
+    }
+    return [start, res];
+  }
+
   setItemContent() {
-    let start = this.feedPerPage * (this.currentPage - 1);
-    let items = this.currentItems.slice(start, start + this.feedPerPage);
-    this.totalPages = Math.ceil(this.currentItems.length / this.feedPerPage);
+    let [start, items] = this._getItems(this.currentItems);
+    this.totalPages = Math.ceil(this._countItems(this.currentItems) / this.feedPerPage);
     let html = '';
     let $container = $('#feedItems');
     $container.empty().isotope('destroy');
     items.forEach((item, i) => {
-      html += Media.template(item, start + i);
+      if (item.display_urls) {
+        item.display_urls.forEach(e => {
+          if (e.indexOf('|') > 0) {
+            let urls = e.split('|');
+            item.is_video = true;
+            item.video_url = urls[0];
+            item.display_src = urls[1];
+          } else {
+            item.is_video = false;
+            item.display_src = e;
+          }
+          html += Media.template(item, start + i);
+        });
+      } else {
+        html += Media.template(item, start + i);
+      }
     });
     $container.html(html);
 
@@ -238,15 +282,18 @@ class Main {
 
     $('.likeIcon').click(e => {
       let $e = $(e.currentTarget);
-      let item = this.currentItems[$e.parents('.card').data('id')];
+      let id = $e.parents('.card').data('id');
+      let item = this.currentItems[id];
       let liked = item.likes.viewer_has_liked;
       new Media({item: item, fetcher: this.fetcher})
         .like(liked)
         .then(res => {
           if (res) {
-            $e.find('i').text(`favorite${liked ? '_border' : ''}`);
-            $e.find('.likes').text(res.likes.count);
-            $e.find('.comments').text(res.comments.count);
+            this.currentItems[id] = res;
+            let $c = $(`.card[data-id="${id}"]`);
+            $c.find('.likeIcon i').text(`favorite${liked ? '_border' : ''}`);
+            $c.find('.likes').text(res.likes.count);
+            $c.find('.comments').text(res.comments.count);
           }
         });
       A.e('feed', 'click-like', this._getDateLabel(item.date / 100));

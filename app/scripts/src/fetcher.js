@@ -3,6 +3,7 @@ function pdelay(ms) {
     setTimeout(resolve, ms);
   });
 }
+const fixSrc = (s) => (s.replace(/\w\d+x\d+\//, ''));
 
 class Fetcher {
   constructor(options) {
@@ -81,7 +82,17 @@ class Fetcher {
         item.display_src = item.display_url;
         delete item.display_url;
       }
-      item.display_src = item.display_src.replace(/\w\d+x\d+\//, '');
+      if (item.__typename === 'GraphSidecar') {
+        let display_urls = [];
+        item.edge_sidecar_to_children.edges.forEach(e => {
+          let n = e.node;
+          display_urls.push((n.is_video ? (n.video_url + '|') : '') + 
+            fixSrc(n.display_url));
+        });
+        item.display_urls = display_urls;
+        delete item.edge_sidecar_to_children;
+      }
+      item.display_src = fixSrc(item.display_src);
       let key = moment(item.date * 1000).startOf('day') / 100000;
       if (key) {
         if (temp[key] === undefined) {
@@ -112,9 +123,8 @@ class Fetcher {
         if (!feed) {
           return false;
         }
-        feed = feed[0].feed ? feed[0].feed.media :
-          feed[0].graphql.user.edge_web_feed_timeline;
-        this.storeItem(feed.nodes ? feed.nodes : feed.edges);
+        feed = feed[0].graphql.user.edge_web_feed_timeline;
+        this.storeItem(feed.edges);
         this.token = data.config.csrf_token;
         this.lastCursor = feed.page_info.end_cursor;
         s = doc = null;
@@ -123,23 +133,15 @@ class Fetcher {
   }
 
   feed(count, total) {
-    let data = 'q=ig_me() { feed { media.after(' + this.lastCursor +
-      ', ' + this.syncEach + ') {' +
-      'nodes {id, caption, code, comments.last(4) { count, nodes {' +
-      'id, created_at, text, user { id, profile_pic_url, username }' +
-      '}, page_info}, date, display_src, is_video, likes {' +
-      'count, viewer_has_liked }, location { id, has_public_page, name },' +
-      'owner { id, blocked_by_viewer, followed_by_viewer, full_name, ' +
-      'has_blocked_viewer, is_private, profile_pic_url, ' +
-      'requested_by_viewer, username }, ' +
-      'usertags { nodes { user { username }, x, y } },' +
-      'video_url, video_views}, page_info } }, ' +
-      'id, profile_pic_url, username }&ref=feed%3A%3Ashow';
-    return this.post('query/', data)
+    let url = 'graphql/query/?query_id=17861995474116400&'+
+      `fetch_media_item_count=${this.syncEach}&`+
+      `fetch_media_item_cursor=${this.lastCursor}&`+
+      'fetch_comment_count=4&fetch_like=10';
+    return this.getJSON(url)
     .then(body => {
-      let feed = body.feed.media;
+      let feed = body.data.user.edge_web_feed_timeline;
       this.lastCursor = feed.page_info.end_cursor;
-      this.storeItem(feed.nodes);
+      this.storeItem(feed.edges);
       count--;
       console.log(`Synced ${total - count}/${total} feed.`);
       chrome.browserAction.setBadgeText({text: `${total - count}/${total}`});

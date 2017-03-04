@@ -5,6 +5,8 @@ Provide what you expected from Instagram.
 - Auto sync feeds
 - Display feeds
   - Auto reload & Pagination
+  - Support multiple photos / videos
+  - Customize display layout
   - Show photos & videos in lightbox
   - Sort by date, likes and comments
   - Search & Filter feeds
