@@ -30,6 +30,8 @@ class Main {
     this.sortBy = 'date';
     this.sortOrder = false;
     this.lastAct = null;
+    this.lastCount = null;
+    this.lastKey = null;
 
     this.fetcher = null;
     chrome.runtime.getBackgroundPage(w => {this.fetcher = w.fetcher});
@@ -66,6 +68,8 @@ class Main {
 
   init() {
     this.addDates().then(dates => {
+      this.lastCount = dates[0].count;
+      this.lastKey = dates[0].key;
       this.loadFeed(dates[0].key);
     });
 
@@ -132,27 +136,24 @@ class Main {
   }
 
   autoReload() {
+    let needReload = (!this.searchQuery && !this.filterQuery) ||
+      new Date() - this.lastAct > 15 * 60 * 1000;
     this.addDates().then(dates => {
-      if (dates[0].key !== this.currentKey &&
-        !this.searchQuery && !this.filterQuery &&
-        new Date() - this.lastAct > 5 * 60 * 1000) {
-        this.loadFeed(dates[0].key);
+      let { count, key } = dates[0];
+      let newItems = count - this.lastCount;
+      if ((newItems > 0 || this.lastKey !== key) && needReload) {
+        this.lastCount = count;
+        this.lastKey = key;
+        this.loadFeed(key);
+        chrome.notifications.create('sync', {
+          type: 'basic',
+          iconUrl: 'images/icon-128.png',
+          title: 'Oh My IG',
+          message: `Synced ${newItems} new feed${newItems > 1 ? 's' : ''}.`
+        });
+        A.e('feed', 'auto-reload', this._getDateLabel(key));
       }
     });
-    DB.g(this.currentKey)
-      .then(items => {
-        let newItems = items.length - this.currentItems.length;
-        if (newItems > 0 && !this.searchQuery && !this.filterQuery) {
-          chrome.notifications.create('sync', {
-            type: 'basic',
-            iconUrl: 'images/icon-128.png',
-            title: 'Oh My IG',
-            message: `Synced ${newItems} new feed${newItems > 1 ? 's' : ''}.`
-          });
-          this.loadFeed(this.currentKey);
-        }
-      });
-    A.e('feed', 'auto-reload', this._getDateLabel(this.currentKey));
   }
 
   loadFeed(date) {
@@ -206,6 +207,7 @@ class Main {
   }
 
   setItemContent() {
+    this.lastAct = +new Date();
     let [start, items] = this._getItems(this.currentItems);
     this.totalPages = Math.ceil(this._countItems(this.currentItems) / this.feedPerPage);
     let html = '';
