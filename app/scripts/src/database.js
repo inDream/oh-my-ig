@@ -1,6 +1,37 @@
 chrome.promise = new ChromePromise();
 
 const sL = chrome.promise.storage.local;
+
+class Matcher {
+  constructor(q, tagged, liked) {
+    this.q = q;
+    this.regexp = new RegExp(q, 'i');
+    this.tagged = tagged;
+    this.liked = liked;
+  }
+
+  filter(items) {
+    return items.filter(item => {
+      let usertags = '';
+      if (this.tagged) {
+        if (item.usertags && item.usertags.nodes.length) {
+          usertags = item.usertags.nodes
+            .map(u => u.user ? u.user.username : '').join(' ');
+        }
+        if (item.edge_media_to_tagged_user &&
+          item.edge_media_to_tagged_user.edges.length) {
+          usertags = item.edge_media_to_tagged_user.edges
+            .map(u => u.node.user.username).join(' ');
+        }
+      }
+      let str = item.caption + item.owner.username + item.owner.full_name +
+        (item.location ? item.location.name : '') + usertags;
+      return (this.liked && item.likes.viewer_has_liked || !this.liked) &&
+        (this.regexp.test(str) || item.owner.id === this.q);
+    });
+  }
+}
+
 class DB {
   constructor() {
     this.cached = {};
@@ -19,25 +50,38 @@ class DB {
     }
   }
 
-  gCached(key) {
+  gCached(key, matcher) {
     // Get item with cached result
     let ckey = key ? key : '_all_';
+    if (matcher) {
+      ckey += matcher.q;
+    }
     this.cleanCache();
     if (this.cached[ckey]) {
       return Promise.resolve(this.cached[ckey]);
     } else {
-      return sL.get(key)
-        .then(items => {
-          this.cached[ckey] = items;
-          return key ? items[key] : items;
-        });
+      return DB.g(key, matcher).then(items => {
+        this.cached[ckey] = items;
+        return key ? items[key] : items;
+      });
     }
   }
 
-  static g(key) {
+  static g(key, matcher) {
     // Get all items or item with specific key
+    if (key === null && localStorage.dates) {
+      let dates = JSON.parse(localStorage.dates);
+      let res = [];
+      return Promise.all(dates.map(e => (
+        DB.g(e.key).then(items => {
+          res = res.concat(matcher ? matcher.filter(items) : items);
+        })
+      ))).then(() => res);
+    }
     return sL.get(key)
-      .then(items => key ? items[key] : items);
+      .then(items => {
+        return key ? items[key] : items
+      });
   }
 
   static s(kv) {
@@ -72,7 +116,19 @@ class DB {
         }
         console.log(`Updated ${updated} & saved ${items.length} in ${key}.`);
         if (updated || items.length) {
-          return DB.s({[key]: (old || []).concat(items)});
+          let newItems = (old || []).concat(items);
+          if (localStorage.dates) {
+            let dates = JSON.parse(localStorage.dates);
+            let idx = dates.map(e => e.key).indexOf(key);
+            if (idx === -1) {
+              dates.unshift({count: newItems.length, key});
+            } else {
+              dates[idx] = {key, count: newItems.length};
+            }
+            dates = dates.sort((a, b) => +b.key - +a.key);
+            localStorage.dates = JSON.stringify(dates);
+          }
+          return DB.s({[key]: newItems});
         }
       });
   }

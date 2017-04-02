@@ -38,12 +38,20 @@ class Main {
   }
 
   addDates() {
+    if (localStorage.dates) {
+      let dates = JSON.parse(localStorage.dates);
+      this._addDates(dates);
+      return Promise.resolve(dates);
+    }
     return DB.g(null).then(items => {
       delete items.options;
       let dates = Object.keys(items).reverse();
       dates = dates.map(date => {
         return {key: date, count: items[date].length};
       });
+      if (!localStorage.dates) {
+        localStorage.dates = JSON.stringify(dates);
+      }
       this._addDates(dates);
       return dates;
     });
@@ -348,23 +356,12 @@ class Main {
 
   filterFeed(e) {
     clearTimeout(this.filterTimer);
-    this.filterTimer = setTimeout(() => this._filterFeed(e), 500);
+    this.filterTimer = setTimeout(() => this._filterFeed(e), 1000);
   }
 
   searchFeed() {
     clearTimeout(this.searchTimer);
-    this.searchTimer = setTimeout(() => this._searchFeed(), 500);
-  }
-
-  _matchFeed(items, regexp, query) {
-    let tagged = $('#searchTagged').prop('checked');
-    return items.filter(item => {
-      let str = item.caption + item.owner.username + item.owner.full_name +
-        (item.location ? item.location.name : '') +
-        (!tagged || !item.usertags.nodes.length ? '' :
-        item.usertags.nodes.map(u => u.user ? u.user.username : '').join(' '));
-      return regexp.test(str) || item.owner.id === query;
-    });
+    this.searchTimer = setTimeout(() => this._searchFeed(), 1000);
   }
 
   trim(str) {
@@ -382,17 +379,23 @@ class Main {
         return;
       }
       this.filterQuery = filter;
-      let regexp = new RegExp(filter, 'i');
+      let matcher = this._getMatcher(filter);
       this.oldItems = this.currentItems.slice();
-      this._sortItems(this._matchFeed(this.currentItems, regexp, filter));
+      this._sortItems(matcher.filter(this.currentItems));
       this.setItemContent();
       A.e('feed', 'filter', filter.split('|').length);
     } else if (this.filterQuery) {
       this.filterQuery = null;
-      this.currentItems = this.oldItems.slice();
+      this._sortItems(this.oldItems.slice());
       this.oldItems = null;
       this.setItemContent();
     }
+  }
+
+  _getMatcher(q) {
+    let tagged = $('#searchTagged').prop('checked');
+    let liked = $('#searchLiked').prop('checked');
+    return new Matcher(q, tagged, liked);
   }
 
   _searchFeed() {
@@ -402,23 +405,16 @@ class Main {
       if (this.searchQuery === search) {
         return;
       }
-      let regexp = new RegExp(search, 'i');
-      this.db.gCached(null).then(items => {
-        delete items.options;
-        let dates = Object.keys(items).reverse();
-        let result = [];
-        dates.forEach(date => {
-          result = result.concat(this._matchFeed(items[date], regexp, search));
-        });
+      let matcher = this._getMatcher(search);
+      this.db.gCached(null, matcher).then(items => {
         if (liked) {
-          result = result.filter(item => item.likes.viewer_has_liked);
           A.e('feed', 'search', 'liked');
         }
         if (search) {
           this.searchQuery = search;
           A.e('feed', 'search', search.split('|').length);
         }
-        this._sortItems(result);
+        this._sortItems(items);
         this.setItemContent();
       });
     } else if (this.searchQuery) {
