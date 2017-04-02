@@ -308,9 +308,11 @@ class Main {
       new Media({item: item, fetcher: this.fetcher})
         .updateCache()
         .then(res => {
-          this.currentItems[id] = res;
-          this._sortItems(this.currentItems);
-          this.setItemContent();
+          if (res) {
+            this.currentItems[id] = res;
+            this._sortItems(this.currentItems);
+            this.setItemContent();
+          }
         });
       A.e('feed', 'click-reload', this._getDateLabel(item.date / 100));
     });

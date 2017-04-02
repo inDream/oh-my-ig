@@ -77,21 +77,15 @@ class Media {
     return this.fetcher.getJSON(`p/${this.code}/?__a=1`)
       .then(body => {
         if (body.media) {
-          let found = false;
           let key = moment(body.media.date * 1000).startOf('day') / 100000;
-          DB.g(key + '').then(items => {
-            let newItems = items.map(item => {
-              if (item.id === body.media.id) {
-                found = true;
-                return body.media;
-              }
-              return item;
+          return this.fetcher.storeItem([body.media])
+            .then(() => (DB.g(key + '')))
+            .then(items => {
+              let found = items.filter(item => (item.id === body.media.id));
+              return found.length ? found[0] : null;
             });
-            if (found) {
-              return DB.s({[key]: newItems});
-            }
-          });
-          return body.media;
+        } else {
+          return Promise.resolve(null);
         }
       });
   }
