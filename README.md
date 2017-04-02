@@ -13,7 +13,6 @@ Provide what you expected from Instagram.
   - Notification about new feeds
 - Planned:
   - View & create comments
-  - Customize column layout
   - Grouping users
   - Theme
   - Multi account

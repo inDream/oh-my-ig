@@ -1,6 +1,6 @@
 {
   "name": "__MSG_appName__",
-  "version": "0.0.3.9",
+  "version": "0.0.4.0",
   "manifest_version": 2,
   "description": "__MSG_appDescription__",
   "icons": {
@@ -28,7 +28,7 @@
     "unlimitedStorage",
     "webRequest",
     "webRequestBlocking",
-    "*://www.instagram.com/"
+    "*://*.instagram.com/"
   ],
   "browser_action": {
     "default_icon": {

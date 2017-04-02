@@ -1,6 +1,6 @@
 {
   "name": "oh-my-ig",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Provide what you expected from Instagram.",
   "dependencies": {
     "chrome-promise": "^2.0.2",
