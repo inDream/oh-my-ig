@@ -11,6 +11,7 @@ class Fetcher {
     this.syncEach = options.syncEach;
     this.token = null;
     this.lastCursor = null;
+    this.query_id = '17866917712078875';
   }
 
   getJSON(url) {
@@ -81,6 +82,14 @@ class Fetcher {
         delete item.shortcode;
         item.display_src = item.display_url;
         delete item.display_url;
+        let usertags = {nodes: []};
+        if (item.edge_media_to_tagged_user.edges.length) {
+          item.edge_media_to_tagged_user.edges.forEach(e => {
+            usertags.nodes.push(e.node);
+          });
+        }
+        item.usertags = usertags;
+        delete item.edge_media_to_tagged_user;
       }
       if (item.__typename === 'GraphSidecar') {
         let display_urls = [];
@@ -101,9 +110,8 @@ class Fetcher {
         temp[key].push(item);
       }
     });
-    Object.keys(temp).forEach(key => {
-      return DB.push(key, temp[key]);
-    });
+    let newItems = Object.keys(temp).map(key => (DB.push(key, temp[key])));
+    return Promise.all(newItems);
   }
 
   home() {
@@ -127,15 +135,30 @@ class Fetcher {
         this.storeItem(feed.edges);
         this.token = data.config.csrf_token;
         this.lastCursor = feed.page_info.end_cursor;
-        s = doc = null;
+
+        let common = doc.querySelector('script[src*="Commons.js"]');
+        common = this.base + common.getAttribute('src').slice(1); 
+        return fetch(common, {credentials: 'include'});
+      })
+      .then(res => res.text())
+      .then(body => {
+        try {
+          body = body.slice(body.indexOf(',"graphql_queries/feed/feed'))
+          body = body.slice(body.indexOf('{'), body.indexOf('}') + 1)
+          let query = body.match(/\w+/g);
+          if (query) {
+            this.query_id = query[3];
+          }
+        } catch(e) {}
+        
         return true;
       });
   }
 
   feed(count, total) {
-    let url = 'graphql/query/?query_id=17861995474116400&'+
-      `fetch_media_item_count=${this.syncEach}&`+
-      `fetch_media_item_cursor=${this.lastCursor}&`+
+    let url = `graphql/query/?query_id=${this.query_id}&`+
+      `fetch_media_item_count=${this.syncEach}&` +
+      `fetch_media_item_cursor=${this.lastCursor}&` +
       'fetch_comment_count=4&fetch_like=10';
     return this.getJSON(url)
     .then(body => {
