@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "dependencies": {
-    "Materialize": "materialize#^0.97.6",
+    "Materialize": "materialize#^0.98.0",
     "imagesloaded": "^4.1.1",
     "magnific-popup": "^1.1.0"
   },

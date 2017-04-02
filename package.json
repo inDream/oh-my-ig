@@ -4,22 +4,22 @@
   "description": "Provide what you expected from Instagram.",
   "dependencies": {
     "chrome-promise": "^2.0.2",
-    "isotope-layout": "^3.0.2",
-    "moment": "^2.17.1"
+    "isotope-layout": "^3.0.3",
+    "moment": "^2.18.1"
   },
   "devDependencies": {
     "del": "^2.2.2",
     "gulp": "^3.9.1",
-    "gulp-cache": "^0.4.5",
-    "gulp-clean-css": "^3.0.3",
+    "gulp-cache": "^0.4.6",
+    "gulp-clean-css": "^3.0.4",
     "gulp-eslint": "^3.0.1",
     "gulp-if": "^2.0.2",
-    "gulp-imagemin": "^3.1.1",
+    "gulp-imagemin": "^3.2.0",
     "gulp-livereload": "^3.8.1",
     "gulp-load-plugins": "^1.5.0",
     "gulp-htmlmin": "^3.0.0",
     "gulp-size": "^2.1.0",
-    "gulp-uglify": "^2.0.1",
+    "gulp-uglify": "^2.1.2",
     "gulp-useref": "^3.1.2",
     "gulp-zip": "^4.0.0",
     "main-bower-files": "^2.13.1",

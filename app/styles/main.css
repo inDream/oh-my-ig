@@ -20,8 +20,14 @@
   text-transform: none;
 }
 
+#feedDates {  
+  margin-top: 2.5em;
+  margin-left: 1em;
+}
+
 #feedDates .badge {
   position: absolute;
+  right: 20px;
   margin-left: 0;
   line-height: inherit;
 }
