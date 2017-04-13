@@ -148,7 +148,7 @@ class Main {
       new Date() - this.lastAct > 15 * 60 * 1000;
     this.addDates().then(dates => {
       let { count, key } = dates[0];
-      let newItems = count - this.lastCount;
+      let newItems = this.lastKey === key ? count - this.lastCount : count;
       if ((newItems > 0 || this.lastKey !== key) && needReload) {
         this.lastCount = count;
         this.lastKey = key;
@@ -199,9 +199,8 @@ class Main {
     for (let i = 0; i < items.length; i++) {
       let e = items[i];
       let len = e.display_urls ? e.display_urls.length : 1;
-      if (this._countItems(res) + len < this.feedPerPage) {
-        res.push(e);
-      } else {
+      res.push(e);
+      if (this._countItems(res) + len > this.feedPerPage) {
         if (this.currentPage !== page) {
           start = i;
           res = [];
