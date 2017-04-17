@@ -90,6 +90,10 @@ class Fetcher {
         }
         item.usertags = usertags;
         delete item.edge_media_to_tagged_user;
+
+        delete item.attribution;
+        delete item.comments_disabled;
+        delete item.edge_media_to_sponsor_user;
       }
       if (item.__typename === 'GraphSidecar') {
         let display_urls = [];

@@ -405,7 +405,7 @@ class Main {
         return;
       }
       let matcher = this._getMatcher(search);
-      this.db.gCached(null, matcher).then(items => {
+      chrome.runtime.sendMessage({action: 'search', matcher}, items => {
         if (liked) {
           A.e('feed', 'search', 'liked');
         }

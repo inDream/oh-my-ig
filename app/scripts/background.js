@@ -3,6 +3,7 @@
 let base = 'https://www.instagram.com/';
 let options = null;
 let fetcher = null;
+let db = new DB();
 
 function setupAlarms() {
   chrome.alarms.create('sync', {
@@ -59,19 +60,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       setupAlarms();
       DB.s({options: options});
       break;
+    case 'search':
+      let { q, tagged, liked } = request.matcher;
+      let matcher = new Matcher(q, tagged, liked);
+      db.gCached(null, matcher).then(items => {
+        sendResponse(items);
+      });
+      break;
   }
+  return true;
 });
 
 chrome.webRequest.onBeforeSendHeaders.addListener(details => {
-  if (details.tabId === -1) {
-    details.requestHeaders.forEach(header => {
-      if (header.name === 'Origin') {
-        header.value = base;
-      }
-    });
-  }
   let referer = false;
   details.requestHeaders.forEach(header => {
+    if (details.tabId === -1 && header.name === 'Origin') {
+      header.value = base;
+    }
     if (header.name === 'Referer') {
       header.value = base;
       referer = true;
