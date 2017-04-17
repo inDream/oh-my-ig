@@ -3,6 +3,7 @@ class Media {
     this.id = options.item.id;
     this.code = options.item.code;
     this.fetcher = options.fetcher;
+    this.username = options.item.owner.username;
   }
 
   static template(item, i) {
@@ -74,7 +75,7 @@ class Media {
   }
 
   updateCache() {
-    return this.fetcher.getJSON(`p/${this.code}/?__a=1`)
+    return this.fetcher.getJSON(`p/${this.code}/?taken-by=${this.username}&__a=1`)
       .then(body => {
         if (body.media) {
           let key = moment(body.media.date * 1000).startOf('day') / 100000;
