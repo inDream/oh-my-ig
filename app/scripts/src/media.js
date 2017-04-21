@@ -77,12 +77,14 @@ class Media {
   updateCache() {
     return this.fetcher.getJSON(`p/${this.code}/?taken-by=${this.username}&__a=1`)
       .then(body => {
-        if (body.media) {
-          let key = moment(body.media.date * 1000).startOf('day') / 100000;
-          return this.fetcher.storeItem([body.media])
+        let media = body.graphql.shortcode_media;
+        if (media) {
+          let date = media.taken_at_timestamp;
+          let key = moment(date * 1000).startOf('day') / 100000;
+          return this.fetcher.storeItem([{ node: media }])
             .then(() => (DB.g(key + '')))
             .then(items => {
-              let found = items.filter(item => (item.id === body.media.id));
+              let found = items.filter(item => (item.id === media.id));
               return found.length ? found[0] : null;
             });
         } else {
