@@ -3,7 +3,16 @@ function pdelay(ms) {
     setTimeout(resolve, ms);
   });
 }
-const fixSrc = (s) => (s.replace(/\w\d+x\d+\//, ''));
+const fixSrc = (s) => {
+  if (s.match(/\/fr\//)) {
+    return s;
+  }
+  if (s.indexOf('mp4') === -1 && s.match(/\w\d{3,4}x\d{3,4}\//g)) {
+    s = s.replace('/vp/', '/');
+  }
+  return s.replace(/c\d+\.\d+\.\d+\.\d+\//, '')
+    .replace(/\w\d{3,4}x\d{3,4}\//g, s.match(/\/e\d{2}\//) ? '' : 'e15/');
+};
 
 class Fetcher {
   constructor(options) {
@@ -80,7 +89,7 @@ class Fetcher {
         delete item.edge_media_to_comment;
         item.code = item.shortcode;
         delete item.shortcode;
-        item.display_src = item.display_url;
+        item.display_src = fixSrc(item.display_url);
         delete item.display_url;
         let usertags = {nodes: []};
         if (item.edge_media_to_tagged_user.edges.length) {
@@ -90,6 +99,13 @@ class Fetcher {
         }
         item.usertags = usertags;
         delete item.edge_media_to_tagged_user;
+
+        item.owner = {
+          full_name: item.owner.full_name,
+          id: item.owner.id,
+          profile_pic_url: fixSrc(item.owner.profile_pic_url),
+          username: item.owner.username
+        };
 
         delete item.attribution;
         delete item.comments_disabled;
