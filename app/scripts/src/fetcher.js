@@ -108,8 +108,15 @@ class Fetcher {
         };
 
         delete item.attribution;
+        delete item.caption_is_edited;
         delete item.comments_disabled;
         delete item.edge_media_to_sponsor_user;
+        delete item.edge_web_media_to_related_media;
+        delete item.gating_info;
+        delete item.is_ad;
+        delete item.media_preview;
+        delete item.should_log_client_event;
+        delete item.tracking_token;
       }
       if (item.__typename === 'GraphSidecar') {
         let display_urls = [];
