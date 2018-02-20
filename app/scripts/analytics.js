@@ -1,27 +1,33 @@
-window.ga = function() {(ga.q = ga.q || []).push(arguments)};
-ga.l = +new Date;
-let a = document.createElement('script');
+window.ga = (...args) => { (window.ga.q = window.ga.q || []).push(args); };
+window.ga.l = +new Date();
+const a = document.createElement('script');
 a.src = 'https://www.google-analytics.com/analytics.js';
 document.body.appendChild(a);
 
-ga('create', 'UA-79013702-3', 'auto');
-ga('set', 'checkProtocolTask', () => {});
-ga('require', 'displayfeatures');
+window.ga('create', 'UA-79013702-3', 'auto');
+window.ga('set', 'checkProtocolTask', () => {});
+window.ga('require', 'displayfeatures');
 
 if (typeof Fetcher === 'undefined') {
-  ga('send', 'pageview', location.pathname);
+  window.ga('send', 'pageview', window.location.pathname);
 } else {
-  chrome.runtime.onInstalled.addListener(o => {
+  chrome.runtime.onInstalled.addListener((o) => {
     if (o.reason !== 'chrome_update') {
-      A.e('extension', o.reason, chrome.runtime.getManifest().version, null,
-        {nonInteraction: 1});
+      window.A.e(
+        'extension', o.reason, chrome.runtime.getManifest().version, null,
+        { nonInteraction: 1 },
+      );
     }
   });
 }
 
 class A {
   static e(cat, action, label, value, options) {
-    ga('send', 'event', cat, action, label || null, value || null,
-      options || null);
+    window.ga(
+      'send', 'event', cat, action, label || null, value || null,
+      options || null,
+    );
   }
 }
+
+window.A = A;

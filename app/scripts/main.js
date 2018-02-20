@@ -1,19 +1,19 @@
 moment.updateLocale('en', {
-  relativeTime : {
+  relativeTime: {
     future: 'in %s',
     past: '%s ago',
-    s:  '%ds',
-    m:  '1m',
+    s: '%ds',
+    m: '1m',
     mm: '%dm',
-    h:  '1h',
+    h: '1h',
     hh: '%dh',
-    d:  '1d',
+    d: '1d',
     dd: '%dd',
-    M:  '1M',
+    M: '1M',
     MM: '%dM',
-    y:  '1y',
-    yy: '%dy'
-  }
+    y: '1y',
+    yy: '%dy',
+  },
 });
 
 class Main {
@@ -34,59 +34,71 @@ class Main {
     this.lastKey = null;
 
     this.fetcher = null;
-    chrome.runtime.getBackgroundPage(w => {this.fetcher = w.fetcher});
+    chrome.runtime.getBackgroundPage((w) => { this.fetcher = w.fetcher; });
   }
 
   addDates() {
     if (localStorage.dates) {
-      let dates = JSON.parse(localStorage.dates);
-      this._addDates(dates);
+      const dates = JSON.parse(localStorage.dates);
+      this.addDatesHtml(dates);
       return Promise.resolve(dates);
     }
-    return DB.g(null).then(items => {
+    return DB.g(null).then((items) => {
       delete items.options;
+      delete items.stories;
       let dates = Object.keys(items).reverse();
-      dates = dates.map(date => {
-        return {key: date, count: items[date].length};
-      });
+      dates = dates.map(date => ({ key: date, count: items[date].length }));
       if (!localStorage.dates) {
         localStorage.dates = JSON.stringify(dates);
       }
-      this._addDates(dates);
+      this.addDatesHtml(dates);
       return dates;
     });
   }
 
-  _getDateLabel(key) {
+  getDateLabel(key) {
     let d = moment(key * 100000);
     d = d.format('DD/MM/YYYY');
     return d;
   }
 
-  _addDates(items) {
+  addDatesHtml(items) {
     let html = '';
-    items.forEach(item => {
-      let d = this._getDateLabel(item.key);
+    items.forEach((item) => {
+      const d = this.getDateLabel(item.key);
       html += `<a data-date="${item.key}" class="collection-item">
       ${d}<span class="new badge">${item.count}</span></a>`;
     });
     $('#feedDates').html(html);
-    $('.dropdown-button').dropdown();
+    $('.dropdown-trigger').dropdown();
   }
 
   init() {
-    this.addDates().then(dates => {
-      this.lastCount = dates[0].count;
-      this.lastKey = dates[0].key;
-      this.loadFeed(dates[0].key);
-    });
+    DB.g('options')
+      .then((options) => {
+        switch (window.location.pathname) {
+          case '/feed.html':
+            this.addDates().then((dates) => {
+              this.lastCount = dates[0].count;
+              this.lastKey = dates[0].key;
+              this.loadFeed(dates[0].key);
+            });
+            // Setup auto reload
+            if (options.autoReload) {
+              setInterval(this.autoReload.bind(this), options.autoReload * 60000);
+            }
+            break;
+          default:
+        }
+        this.feedPerPage = options.feedPerPage;
+      });
 
     // Event handler
     $('#feedDates').on('click', 'a', (e) => {
       this.lastAct = +new Date();
-      let date = $(e.currentTarget).data('date') + '';
+      const date = `${$(e.currentTarget).data('date')}`;
       this.loadFeed(date);
-      A.e('feed', 'click-date', this._getDateLabel(date));
+      A.e('feed', 'click-date', this.getDateLabel(date));
     });
 
     $('#sortOrder').click();
@@ -99,43 +111,39 @@ class Main {
     $('.brand-logo').click(() => window.scrollTo(0, 0));
 
     // Fix for multiple dropdown activate
-    $('.dropdown-button').click(e => {
+    $('.dropdown-button').click((e) => {
       $(e.currentTarget).dropdown();
     });
 
     $('#feedItems').isotope();
 
-    DB.g('options')
-      .then(options => {
-        // Setup auto reload
-        if (options.autoReload) {
-          setInterval(this.autoReload.bind(this), options.autoReload * 60000);
-        }
-        this.feedPerPage = options.feedPerPage;
-      });
-
     chrome.notifications.onClicked.addListener(() => {
-      chrome.tabs.getCurrent(tab => {
-        chrome.tabs.update(tab.id, {active: true});
+      chrome.tabs.getCurrent((tab) => {
+        chrome.tabs.update(tab.id, { active: true });
       });
     });
 
     $('.pagination').click((e) => {
       this.lastAct = +new Date();
-      let $e = e.target.tagName === 'LI' ? $(e.target) :
+      const $e = e.target.tagName === 'LI' ? $(e.target) :
         $(e.target).parents('li');
       if ($e.not('.active')) {
         if ($e.is('.pagination-left') && this.currentPage > 1) {
-          this.currentPage--;
-        } else if ($e.is('.pagination-right') && 
+          this.currentPage -= 1;
+        } else if ($e.is('.pagination-right') &&
           this.currentPage < this.totalPages) {
-          this.currentPage++;
+          this.currentPage += 1;
         } else if ($e.is('.pages')) {
           this.currentPage = +$e.text();
         } else {
           return;
         }
-        this.setItemContent();
+        switch (window.location.pathname) {
+          case '/feed.html':
+            this.setItemContent();
+            break;
+          default:
+        }
         window.scrollTo(0, $('.section').offset().top - $('nav').height());
       }
     });
@@ -144,11 +152,11 @@ class Main {
   }
 
   autoReload() {
-    let needReload = (!this.searchQuery && !this.filterQuery) ||
+    const needReload = (!this.searchQuery && !this.filterQuery) ||
       new Date() - this.lastAct > 15 * 60 * 1000;
-    this.addDates().then(dates => {
-      let { count, key } = dates[0];
-      let newItems = this.lastKey === key ? count - this.lastCount : count;
+    this.addDates().then((dates) => {
+      const { count, key } = dates[0];
+      const newItems = this.lastKey === key ? count - this.lastCount : count;
       if ((newItems > 0 || this.lastKey !== key) && needReload) {
         this.lastCount = count;
         this.lastKey = key;
@@ -157,9 +165,9 @@ class Main {
           type: 'basic',
           iconUrl: 'images/icon-128.png',
           title: 'Oh My IG',
-          message: `Synced ${newItems} new feed${newItems > 1 ? 's' : ''}.`
+          message: `Synced ${newItems} new feed${newItems > 1 ? 's' : ''}.`,
         });
-        A.e('feed', 'auto-reload', this._getDateLabel(key));
+        A.e('feed', 'auto-reload', this.getDateLabel(key));
       }
     });
   }
@@ -167,47 +175,60 @@ class Main {
   loadFeed(date) {
     this.currentKey = date;
     $('.titleDate').text(moment(+date * 100000).format('DD/MM/YYYY'));
-    DB.g(date).then(items => {
-      this._sortItems(items);
+    DB.g(date).then((items) => {
+      this.sortItems(items);
       console.log(`Loaded ${items.length} items from ${date}.`);
       this.setItemContent();
     });
   }
 
-  _sortItems(items) {
-    let s = this.sortBy;
+  sortItems(items) {
+    const s = this.sortBy;
     this.currentItems = items.sort((a, b) => {
-      let x = this.sortOrder ? a : b;
-      let y = this.sortOrder ? b : a;
+      const x = this.sortOrder ? a : b;
+      const y = this.sortOrder ? b : a;
       return s === 'date' ? x[s] - y[s] : x[s].count - y[s].count;
     });
     this.currentPage = 1;
+    this.totalPages = this.countItems(this.currentItems);
   }
 
-  _countItems(items) {
-    let count = 0;
-    items.forEach(e => {
-      count += e.display_urls ? e.display_urls.length : 1;
-    });
-    return count;
+  countItems(items) {
+    let total = 0;
+    let page = 1;
+    for (let i = 0; i < items.length; i += 1) {
+      const e = items[i];
+      const len = e.display_urls ? e.display_urls.length : 1;
+      if (total + len > this.feedPerPage) {
+        total = 0;
+        page += 1;
+      } else {
+        total += len;
+      }
+    }
+    return page;
   }
 
-  _getItems(items) {
+  getItems(items) {
     let res = [];
     let start = 0;
+    let total = 0;
     let page = 1;
-    for (let i = 0; i < items.length; i++) {
-      let e = items[i];
-      let len = e.display_urls ? e.display_urls.length : 1;
+    for (let i = 0; i < items.length; i += 1) {
+      const e = items[i];
+      const len = e.display_urls ? e.display_urls.length : 1;
       res.push(e);
-      if (this._countItems(res) + len > this.feedPerPage) {
+      if (total + len > this.feedPerPage) {
         if (this.currentPage !== page) {
+          total = 0;
           start = i;
           res = [];
-          page++;
+          page += 1;
         } else {
           break;
         }
+      } else {
+        total += len;
       }
     }
     return [start, res];
@@ -215,24 +236,24 @@ class Main {
 
   setItemContent() {
     this.lastAct = +new Date();
-    let [start, items] = this._getItems(this.currentItems);
-    this.totalPages = Math.ceil(this._countItems(this.currentItems) / this.feedPerPage);
+    const [start, items] = this.getItems(this.currentItems);
     let html = '';
-    let $container = $('#feedItems');
+    const $container = $('#feedItems');
     $container.empty().isotope('destroy');
     items.forEach((item, i) => {
       if (item.display_urls) {
-        item.display_urls.forEach(e => {
+        item.display_urls.forEach((e) => {
+          const temp = Object.assign({}, item);
           if (e.indexOf('|') > 0) {
-            let urls = e.split('|');
-            item.is_video = true;
-            item.video_url = urls[0];
-            item.display_src = urls[1];
+            const urls = e.split('|');
+            temp.is_video = true;
+            [temp.video_url, temp.display_src] = urls;
           } else {
-            item.is_video = false;
-            item.display_src = e;
+            temp.is_video = false;
+            temp.video_url = null;
+            temp.display_src = e;
           }
-          html += Media.template(item, start + i);
+          html += Media.template(temp, start + i);
         });
       } else {
         html += Media.template(item, start + i);
@@ -240,6 +261,11 @@ class Main {
     });
     $container.html(html);
 
+    this.setLayout($container);
+    this.setItemEvents();
+  }
+
+  setLayout($container) {
     $container.isotope().isotope('layout');
 
     $container.magnificPopup({
@@ -247,165 +273,162 @@ class Main {
       gallery: {
         enabled: true,
         navigateByImgClick: true,
-        preload: [0, 1]
+        preload: [0, 1],
       },
       image: {
-        titleSrc: item => {
-          let $card = item.el.parents('.card');
-          let caption = $card.find('.caption').text();
-          let owner = $card.find('.owner').text();
-          let time = $card.find('time').text();
+        titleSrc: (item) => {
+          const $card = item.el.parents('.card');
+          const caption = $card.find('.caption').text();
+          const owner = $card.find('.owner').text();
+          const time = $card.find('time').text();
           return `<div class="card-owner"><span>${caption}</span>
             <small>by ${owner} ${time} ago</small></div>`;
-        }
-      }
+        },
+      },
     });
 
-    let total = $container.find('img').length;
+    const total = $container.find('img').length;
     let count = 0;
     $container.imagesLoaded()
       .progress(() => {
-        count++;
+        count += 1;
         if (count % Math.round(total / 10) === 0) {
           $container.isotope('layout');
         }
       });
 
     this.setPagination();
-    this.setItemEvents();
+  }
+
+  updateItem(id, res) {
+    if (res) {
+      this.currentItems[id] = res;
+      const $c = $(`.card[data-id="${id}"]`);
+      const liked = res.likes.viewer_has_liked;
+      $c.find('.likeIcon i').text(`favorite${liked ? '' : '_border'}`);
+      $c.find('.likes').text(res.likes.count);
+      $c.find('.comments').text(res.comments.count);
+    }
   }
 
   setItemEvents() {
-    $('.caption').click(e => {
-      let $e = $(e.currentTarget);
+    $('.caption').click((e) => {
+      const $e = $(e.currentTarget);
       if ($e.height() > 80) {
-        let caption = $e.text().replace(/\n/g, '<br>');
+        const caption = $e.text().replace(/\n/g, '<br>');
         $.magnificPopup.open({
           items: {
             src: `<div class="mfp-caption">${caption}</div>`,
-            type: 'inline'
-          }
+            type: 'inline',
+          },
         });
       }
     });
 
-    $('.likeIcon').click(e => {
-      let $e = $(e.currentTarget);
-      let id = $e.parents('.card').data('id');
-      let item = this.currentItems[id];
-      let liked = item.likes.viewer_has_liked;
-      new Media({item: item, fetcher: this.fetcher})
+    $('.likeIcon').click((e) => {
+      const $e = $(e.currentTarget);
+      const id = $e.parents('.card').data('id');
+      const item = this.currentItems[id];
+      const liked = item.likes.viewer_has_liked;
+      new Media({ item, fetcher: this.fetcher })
         .like(liked)
-        .then(res => {
-          if (res) {
-            this.currentItems[id] = res;
-            let $c = $(`.card[data-id="${id}"]`);
-            $c.find('.likeIcon i').text(`favorite${liked ? '_border' : ''}`);
-            $c.find('.likes').text(res.likes.count);
-            $c.find('.comments').text(res.comments.count);
-          }
-        });
-      A.e('feed', 'click-like', this._getDateLabel(item.date / 100));
+        .then(res => this.updateItem(id, res));
+      A.e('feed', 'click-like', this.getDateLabel(item.date / 100));
     });
 
-    $('.reloadBtn').click(e => {
-      let $e = $(e.currentTarget);
-      let id = $e.parents('.card').data('id');
-      let item = this.currentItems[id];
-      new Media({item: item, fetcher: this.fetcher})
+    $('.reloadBtn').click((e) => {
+      const $e = $(e.currentTarget);
+      const id = $e.parents('.card').data('id');
+      const item = this.currentItems[id];
+      new Media({ item, fetcher: this.fetcher })
         .updateCache()
-        .then(res => {
-          if (res) {
-            this.currentItems[id] = res;
-            this._sortItems(this.currentItems);
-            this.setItemContent();
-          }
-        });
-      A.e('feed', 'click-reload', this._getDateLabel(item.date / 100));
+        .then(res => this.updateItem(id, res));
+      A.e('feed', 'click-reload', this.getDateLabel(item.date / 100));
     });
   }
 
   setPagination() {
     $('.pagination .pages').remove();
-    let pages = this.totalPages;
-    let html = new Array(pages).fill('').map((page, i) => {
-      let klass = (i + 1) === this.currentPage ? 'active' : '';
+    const pages = this.totalPages;
+    const html = new Array(pages).fill('').map((page, i) => {
+      const klass = (i + 1) === this.currentPage ? 'active' : '';
       return `<li class="${klass} btn-link pages"><a>${i + 1}</a></li>`;
     }).join('');
     $('.pagination-left').after(html);
   }
 
   sortFeed(e) {
-    let $e = $(e.target);
-    let sortBy = $e.data('sort');
+    const $e = $(e.target);
+    const sortBy = $e.data('sort');
     if ($e.attr('id') === 'sortOrder') {
       this.sortOrder = !this.sortOrder;
     } else if (sortBy) {
       this.sortBy = sortBy;
-      let active = 'teal lighten-3';
+      const active = 'teal lighten-3';
       $('#sortFeed .btn').removeClass(active);
       $e.addClass(active);
     } else {
       return;
     }
-    this._sortItems(this.currentItems);
+    this.sortItems(this.currentItems);
     this.setItemContent();
     A.e('feed', 'sort', `${this.sortBy}-${this.sortOrder ? 'asc' : 'desc'}`);
   }
 
   filterFeed(e) {
     clearTimeout(this.filterTimer);
-    this.filterTimer = setTimeout(() => this._filterFeed(e), 1000);
+    this.filterTimer = setTimeout(() => this.filterFeedSub(e), 1000);
   }
 
   searchFeed() {
     clearTimeout(this.searchTimer);
-    this.searchTimer = setTimeout(() => this._searchFeed(), 1000);
+    this.searchTimer = setTimeout(() => this.searchFeedSub(), 1000);
   }
 
-  trim(str) {
+  trim(s) {
+    let str = s;
     str = str.replace(/^\s+|\s+$/g, '').replace(/\s{2,}/g, ' ');
     if (str.indexOf(' ') > -1) {
       str = str.split(' ').join('|');
     }
-    return str
+    return str;
   }
 
-  _filterFeed(e) {
-    let filter = this.trim($(e.target).val());
+  filterFeedSub(e) {
+    const filter = this.trim($(e.target).val());
     if (filter) {
       if (this.filterQuery === filter) {
         return;
       }
       this.filterQuery = filter;
-      let matcher = this._getMatcher(filter);
+      const matcher = this.getMatcher(filter);
       this.oldItems = this.currentItems.slice();
-      this._sortItems(matcher.filter(this.currentItems));
+      this.sortItems(matcher.filter(this.currentItems));
       this.setItemContent();
       A.e('feed', 'filter', filter.split('|').length);
     } else if (this.filterQuery) {
       this.filterQuery = null;
-      this._sortItems(this.oldItems.slice());
+      this.sortItems(this.oldItems.slice());
       this.oldItems = null;
       this.setItemContent();
     }
   }
 
-  _getMatcher(q) {
-    let tagged = $('#searchTagged').prop('checked');
-    let liked = $('#searchLiked').prop('checked');
+  getMatcher(q) {
+    const tagged = $('#searchTagged').prop('checked');
+    const liked = $('#searchLiked').prop('checked');
     return new Matcher(q, tagged, liked);
   }
 
-  _searchFeed() {
-    let search = this.trim($('#searchFeed').val());
-    let liked = $('#searchLiked').prop('checked');
+  searchFeedSub() {
+    const search = this.trim($('#searchFeed').val());
+    const liked = $('#searchLiked').prop('checked');
     if (search || liked) {
       if (this.searchQuery === search) {
         return;
       }
-      let matcher = this._getMatcher(search);
-      chrome.runtime.sendMessage({action: 'search', matcher}, items => {
+      const matcher = this.getMatcher(search);
+      chrome.runtime.sendMessage({ action: 'search', matcher }, (items) => {
         if (liked) {
           A.e('feed', 'search', 'liked');
         }
@@ -413,7 +436,7 @@ class Main {
           this.searchQuery = search;
           A.e('feed', 'search', search.split('|').length);
         }
-        this._sortItems(items);
+        this.sortItems(items);
         this.setItemContent();
       });
     } else if (this.searchQuery) {
@@ -424,7 +447,7 @@ class Main {
   resetSearch() {
     let label = '';
     if (this.filterQuery) {
-      label += 'filter' + (this.searchQuery ? ' & ' : '');
+      label += `filter${this.searchQuery ? ' & ' : ''}`;
     }
     if (this.searchQuery) {
       label += 'search';
@@ -437,17 +460,23 @@ class Main {
   }
 
   setDisplayOpts() {
-    let width = 100 / $('#noOfColumns').val();
-    let hide = Array.from($('.displayOpts:checked')).map(e => e.dataset.hide);
-    let hideCSS = hide.length ? hide.join(', ') + '{display: none;}' : '';
-    $('#feedStyle').text(`#feedItems .col {width: ${width}%;} ${hideCSS}`);
+    const columns = $('#noOfColumns').val();
+    const width = 100 / columns;
+    const height = ((document.body.clientWidth * 0.9) / columns) - 10;
+    const hide = Array.from($('.displayOpts:checked')).map(e => e.dataset.hide);
+    const hideCSS = hide.length ? `${hide.join(', ')}{display: none;}` : '';
+    $('#feedStyle').text(`
+      #feedItems .col {width: ${width}%;}
+      .mfp {height: ${height}px;}
+      ${hideCSS}`);
     $('#feedItems').isotope('layout');
-    A.e('feed', 'displayOpts', $('#noOfColumns').val() + '-' + hide.join('|'));
+    A.e('feed', 'displayOpts', `${$('#noOfColumns').val()}-${hide.join('|')}`);
   }
 }
 
-let main = new Main();
+const main = new Main();
 $(() => {
   main.init();
-  $('.button-collapse').sideNav();
+  $('.sidenav').sidenav();
+  $('.modal').modal();
 });

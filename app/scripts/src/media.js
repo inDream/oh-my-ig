@@ -7,23 +7,24 @@ class Media {
   }
 
   static template(item, i) {
-    let base = 'https://www.instagram.com/';
-    let location = item.location ? item.location.name : '';
-    let locationId = item.location ? item.location.id : '';
-    let date = moment(item.date * 1000);
-    let timeago = date.fromNow(true);
-    let fulldate = date.format('LLLL');
-    let caption = item.caption || '';
-    let profile = `${base}${item.owner.username}/`;
-    let link = `${base}p/${item.code}/`;
-    let likeIcon = `favorite${item.likes.viewer_has_liked ? '' : '_border'}`;
-    let itemCard = (item.is_video ? 
+    const base = 'https://www.instagram.com/';
+    const location = item.location ? item.location.name : '';
+    const locationId = item.location ? item.location.id : '';
+    const date = moment(item.date * 1000);
+    const timeago = date.fromNow(true);
+    const fulldate = date.format('LLLL');
+    const caption = item.caption || '';
+    const profile = `${base}${item.owner.username}/`;
+    const link = `${base}p/${item.code}/`;
+    const likeIcon = item.likes ? `favorite${item.likes.viewer_has_liked ? '' : '_border'}` : '';
+    const style = `style="background-image: url(${item.display_src});"`;
+    const itemCard = item.video_url ?
       `<div class="card-image card-video">
         <i class="material-icons">play_arrow</i>
-        <a class="mfp mfp-iframe" href="${item.video_url}">` : 
+        <a class="mfp mfp-iframe" href="${item.video_url}">` :
       `<div class="card-image">
-        <a class="mfp mfp-image" href="${item.display_src}">`) + 
-      `<img src="${item.display_src}"></a></div>`;
+        <a class="mfp mfp-image" href="${item.display_src}" ${style}>
+        <img src="${item.display_src}" />`;
 
     return `<div class="col s12 m6 l4">
       <div class="card" data-id="${i}">
@@ -42,7 +43,7 @@ class Media {
             </span>
           </div>
         </div>
-        ${itemCard}
+        ${itemCard}</a></div>
         <div class="card-content">
           <p class="caption">${caption}</p>
         </div>
@@ -64,39 +65,38 @@ class Media {
   }
 
   like(liked) {
-    let state = liked ? 'unlike' : 'like';
-    let url = `web/likes/${this.id}/${state}/`;
+    const state = liked ? 'unlike' : 'like';
+    const url = `web/likes/${this.id}/${state}/`;
     return this.fetcher.post(url)
-      .then(body => {
+      .then((body) => {
         if (body.status === 'ok') {
           return this.updateCache();
         }
+        return false;
       });
   }
 
   updateCache() {
     return this.fetcher.getJSON(`p/${this.code}/?taken-by=${this.username}&__a=1`)
-      .then(body => {
-        let media = body.graphql.shortcode_media;
+      .then((body) => {
+        const media = body.graphql.shortcode_media;
         if (media) {
-          let date = media.taken_at_timestamp;
-          let key = moment(date * 1000).startOf('day') / 100000;
           return this.fetcher.storeItem([{ node: media }])
-            .then(() => (DB.g(key + '')))
-            .then(items => {
-              let found = items.filter(item => (item.id === media.id));
+            .then((items) => {
+              const found = items[0].filter(item => (item.id === media.id));
               return found.length ? found[0] : null;
             });
-        } else {
-          return Promise.resolve(null);
         }
+        return Promise.resolve(null);
       });
   }
 
   static updateTimeElements() {
     $('time').each((i, e) => {
-      let date = moment(+e.dataset.date);
+      const date = moment(+e.dataset.date);
       e.textContent = date.fromNow(true);
     });
   }
 }
+
+window.Media = Media;
