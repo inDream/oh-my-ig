@@ -18,6 +18,7 @@ class Fetcher {
     this.token = null;
     this.lastCursor = null;
     this.query_id = '17866917712078875';
+    this.query_hash = 'd6f4427fbe92d846298cf93df0b937d3';
   }
 
   getJSON(url) {
@@ -155,36 +156,49 @@ class Fetcher {
         if (!feed) {
           return Promise.reject();
         }
-        feed = feed[0].graphql.user.edge_web_feed_timeline;
-        this.storeItem(feed.edges);
+        try {
+          feed = feed[0].graphql.user.edge_web_feed_timeline;
+          this.storeItem(feed.edges);
+          this.lastCursor = feed.page_info.end_cursor;
+        } catch (e) {}
         this.token = data.config.csrf_token;
-        this.lastCursor = feed.page_info.end_cursor;
 
         let common = doc.querySelector('script[src*="Commons.js"]');
-        common = this.base + common.getAttribute('src').slice(1); 
+        common = this.base + common.getAttribute('src').slice(1);
         return fetch(common, { credentials: 'include' });
       })
       .then(res => res.text())
       .then((rawBody) => {
         let body = rawBody;
         try {
-          body = body.slice(body.indexOf(',"graphql_queries/feed/feed'));
-          body = body.slice(body.indexOf('{'), body.indexOf('}') + 1);
-          const query = body.match(/\w+/g);
-          if (query && query.length > 2) {
-            [,, this.query_id] = query;
-          }
-        } catch (e) {}
+          body = body.slice(body.lastIndexOf('edge_web_feed_timeline'));
+          const hash = body.match(/"\w{32}"/g);
+          this.query_hash = hash[0].slice(1, -1);
+        } catch (e) {
+          this.query_hash = null;
+        }
         return true;
       });
   }
 
   feed(oldCount, total) {
-    const url = `graphql/query/?query_id=${this.query_id}&`+
-      `fetch_media_item_count=${this.syncEach}&` +
-      `fetch_media_item_cursor=${this.lastCursor}&` +
-      'fetch_comment_count=4&fetch_like=10';
-    return this.getJSON(url).then((body) => {
+    let url = null;
+    if (this.query_hash) {
+      const data = JSON.stringify({
+        fetch_media_item_count: this.syncEach,
+        fetch_media_item_cursor: this.lastCursor,
+        fetch_comment_count: 4,
+        fetch_like: 10,
+        has_stories: false,
+      });
+      url = `hash=${this.query_hash}&variables=${encodeURIComponent(data)}`;
+    } else {
+      url = `id=${this.query_id}&` +
+        `fetch_media_item_count=${this.syncEach}&` +
+        `fetch_media_item_cursor=${this.lastCursor}&` +
+        'fetch_comment_count=4&fetch_like=10';
+    }
+    return this.getJSON(`graphql/query/?query_${url}`).then((body) => {
       const feed = body.data.user.edge_web_feed_timeline;
       this.lastCursor = feed.page_info.end_cursor;
       this.storeItem(feed.edges);
