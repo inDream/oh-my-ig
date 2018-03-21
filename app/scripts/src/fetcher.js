@@ -171,9 +171,9 @@ class Fetcher {
       .then((rawBody) => {
         let body = rawBody;
         try {
-          body = body.slice(body.lastIndexOf('edge_web_feed_timeline'));
-          const hash = body.match(/"\w{32}"/g);
-          this.query_hash = hash[0].slice(1, -1);
+          body = body.slice(0, body.lastIndexOf('edge_web_feed_timeline'));
+          const hash = body.match(/\w="\w{32}",\w="\w{32}",\w="\w{32}"/g);
+          this.query_hash = hash[0].slice(3, 35);
         } catch (e) {
           this.query_hash = null;
         }
