@@ -4,9 +4,6 @@ const fixSrc = (src) => {
   if (s.match(/\/fr\//)) {
     return s;
   }
-  if (s.indexOf('mp4') === -1 && s.match(/\w\d{3,4}x\d{3,4}\//g)) {
-    s = s.replace('/vp/', '/');
-  }
   return s.replace(/c\d+\.\d+\.\d+\.\d+\//, '')
     .replace(/\w\d{3,4}x\d{3,4}\//g, s.match(/\/e\d{2}\//) ? '' : 'e15/');
 };
@@ -98,7 +95,7 @@ class Fetcher {
         item.owner = {
           full_name: item.owner.full_name,
           id: item.owner.id,
-          profile_pic_url: fixSrc(item.owner.profile_pic_url),
+          profile_pic_url: item.owner.profile_pic_url,
           username: item.owner.username,
         };
 
