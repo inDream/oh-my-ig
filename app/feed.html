@@ -21,19 +21,28 @@
       <nav>
         <div class="nav-wrapper">
           <a class="btn-link brand-logo">Oh My IG</a>
-          <a data-activates="sideNav" class="btn-link button-collapse"><i class="material-icons">menu</i></a>
-          <ul class="right hide-on-med-and-down">
-            <li><a class="dropdown-button btn btn-link" data-activates="feedDates">Select Date (<span class="titleDate"></span>)</a></li>
-            <li><input id="filterFeed" placeholder="Filter"></li>
+          <a data-target="sideNav" class="btn-link sidenav-trigger"><i class="material-icons">menu</i></a>
+          <ul class="left hide-on-med-and-down">
+            <li class="active"><a href="feed.html">Feed</a></li>
           </ul>
-          <ul class="side-nav" id="sideNav">
-            <li><a class="dropdown-button btn btn-link" data-activates="feedDates">Select Date (<span class="titleDate"></span>)</a></li>
+          <ul class="right hide-on-med-and-down">
+            <li><a class="dropdown-trigger btn btn-link" data-target="feedDates">Select Date (<span class="titleDate"></span>)</a></li>
+            <li><input id="filterFeed" placeholder="Filter"></li>
           </ul>
         </div>
       </nav>
     </div>
 
+    <ul class="sidenav" id="sideNav">
+      <li><a href="feed.html">Feed</a></li>
+      <li><a class="dropdown-trigger btn btn-link" data-target="sideFeedDates">Select Date (<span class="titleDate"></span>)</a></li>
+      <div id="sideFeedDates" class="collection dropdown-content"></div>
+    </ul>
+
     <div class="container">
+      <a class="right btn-floating btn-large waves-effect waves-light blue-grey">
+        <i class="material-icons">settings</i>
+      </a>
       <h3 class="title">Latest Feed - <span class="titleDate"></span></h3>
       <div id="feedDates" class="collection dropdown-content"></div>
       <div id="sortFeed" class="row valign-wrapper">
@@ -52,43 +61,49 @@
       </div>
       <form class="row">
         <h5 class="col">Search: </h5>
-        <input id="searchFeed" class="input-field col s8 m6" placeholder="Enter username / user ID / caption / location / tagged username">
-        <input type="checkbox" id="searchTagged" />
-        <label for="searchTagged">Tagged Name</label>
-        <input type="checkbox" id="searchLiked" />
-        <label for="searchLiked">Liked</label>
+        <input id="searchFeed" class="col s8 m6" placeholder="Enter username / user ID / caption / location / tagged username" type="text">
+        <label for="searchTagged">
+          <input type="checkbox" id="searchTagged" />
+          <span>Tagged Name</span>
+        </label>
+        <label for="searchLiked">
+          <input type="checkbox" id="searchLiked" />
+          <span>Liked</span>
+        </label>
         <button id="resetSearch" class="waves-effect waves-light btn" type="reset">Reset</button>
       </form>
-      <div class="row">
+      <div class="row center-fields">
         <h5 class="col">Display Options: </h5>
         <div class="input-field col s3 m1">
-          <input id="noOfColumns" type="number" value="3" class="active input-field validate" />
+          <input id="noOfColumns" type="number" value="3" class="active validate" />
           <label for="noOfColumns">No. of columns: </label>
         </div>
         <h6 class="col">Hide: </h6>
-        <div class="input-field col">
-          <input id="displayUsername" data-hide=".owner" class="displayOpts" type="checkbox" />
-          <label for="displayUsername">Username</label>
-        </div>
-        <div class="input-field col">
-          <input id="displayLocation" data-hide=".location" class="displayOpts" type="checkbox" />
-          <label for="displayLocation">Location</label>
-        </div>
-        <div class="input-field col">
-          <input id="displayProfile" data-hide=".card-profile" class="displayOpts" type="checkbox" />
-          <label for="displayProfile">Profile</label>
-        </div>
-        <div class="input-field col">
-          <input id="displayTime" data-hide="time" class="displayOpts" type="checkbox" />
-          <label for="displayTime">Time</label>
-        </div>
-        <div class="input-field col">
-          <input id="displayCaption" data-hide=".caption" class="displayOpts" type="checkbox" />
-          <label for="displayCaption">Caption</label>
-        </div>
-        <div class="input-field col">
-          <input id="displayActions" data-hide=".card-action" class="displayOpts" type="checkbox" />
-          <label for="displayActions">Actions</label>
+        <div class="checkboxes">
+          <label for="displayUsername">
+            <input id="displayUsername" data-hide=".owner" class="displayOpts" type="checkbox" />
+            <span>Username</span>
+          </label>
+          <label for="displayLocation">
+            <input id="displayLocation" data-hide=".location" class="displayOpts" type="checkbox" />
+            <span>Location</span>
+          </label>
+          <label for="displayProfile">
+            <input id="displayProfile" data-hide=".card-profile" class="displayOpts" type="checkbox" />
+            <span>Profile</span>
+          </label>
+          <label for="displayTime">
+            <input id="displayTime" data-hide="time" class="displayOpts" type="checkbox" />
+            <span>Time</span>
+          </label>
+          <label for="displayCaption">
+            <input id="displayCaption" data-hide=".caption" class="displayOpts" type="checkbox" />
+            <span>Caption</span>
+          </label>
+          <label for="displayActions">
+            <input id="displayActions" data-hide=".card-action" class="displayOpts" type="checkbox" />
+            <span>Actions</span>
+          </label>
         </div>
       </div>
       <div class="divider"></div>

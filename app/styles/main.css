@@ -20,9 +20,9 @@
   text-transform: none;
 }
 
-#feedDates {  
+#feedDates {
   margin-top: 2.5em;
-  margin-left: 1em;
+  max-height: 600px;
 }
 
 #feedDates .badge {
@@ -36,13 +36,27 @@
   cursor: pointer;
 }
 
-body {
+body, button, input, select {
   font-size: 15px;
   font-family: 'Montserrat', 'Source Han Sans TW', 'Noto Sans CJK TC', Arial, Helvetica, sans-serif;
 }
 
 .pagination li.pages {
   width: 30px;
+}
+
+.center-fields {
+  align-items: center;
+  display: flex;
+}
+
+.center-fields label {
+  margin-right: 1em;
+}
+
+.center-fields .checkboxes {
+  display: block;
+  flex: 1;
 }
 
 /* Card */
@@ -63,7 +77,6 @@ body {
 }
 
 .card-owner a, .card-owner span {
-  max-width: 100%;
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;

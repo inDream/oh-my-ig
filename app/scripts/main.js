@@ -70,7 +70,7 @@ class Main {
       ${d}<span class="new badge">${item.count}</span></a>`;
     });
     $('#feedDates').html(html);
-    $('.dropdown-trigger').dropdown();
+    $('.dropdown-trigger').dropdown({ coverTrigger: false });
   }
 
   init() {
@@ -112,7 +112,7 @@ class Main {
 
     // Fix for multiple dropdown activate
     $('.dropdown-button').click((e) => {
-      $(e.currentTarget).dropdown();
+      $(e.currentTarget).dropdown({ coverTrigger: false });
     });
 
     $('#feedItems').isotope();
