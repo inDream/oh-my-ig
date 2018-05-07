@@ -16,13 +16,21 @@ class Fetcher {
     this.lastCursor = null;
     this.query_id = '17866917712078875';
     this.query_hash = 'd6f4427fbe92d846298cf93df0b937d3';
+    this.rhxGis = '';
   }
 
   getJSON(url) {
+    let variables = '';
+    if (url.indexOf('variables') > 0) {
+      variables = url.slice(url.indexOf('variables') + 10);
+    } else {
+      variables = `/${url.slice(0, url.indexOf('?'))}`;
+    }
     const options = {
       method: 'GET',
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
+        'X-Instagram-GIS': md5(`${this.rhxGis}:${variables}`),
       },
       credentials: 'include',
     };
@@ -150,6 +158,7 @@ class Fetcher {
         }
         const data = JSON.parse(s.match(/({".*})/)[1]);
         let feed = data.entry_data.FeedPage;
+        this.rhxGis = data.rhx_gis;
         if (!feed) {
           return Promise.reject();
         }

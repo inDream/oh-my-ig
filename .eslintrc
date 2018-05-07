@@ -17,6 +17,7 @@
     "M": true,
     "Matcher": true,
     "Media": true,
+    "md5": true,
     "moment": true
   },
   "overrides": {

@@ -12,6 +12,7 @@
     "scripts": [
       "scripts/chromereload.js",
       "scripts/libs/chrome-promise.js",
+      "scripts/libs/md5.min.js",
       "scripts/libs/moment.min.js",
       "scripts/src/fetcher.js",
       "scripts/src/database.js",

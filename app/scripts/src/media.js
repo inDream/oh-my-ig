@@ -77,7 +77,7 @@ class Media {
   }
 
   updateCache() {
-    return this.fetcher.getJSON(`p/${this.code}/?taken-by=${this.username}&__a=1`)
+    return this.fetcher.getJSON(`p/${this.code}/?__a=1`)
       .then((body) => {
         const media = body.graphql.shortcode_media;
         if (media) {

@@ -3,6 +3,7 @@
   "version": "0.0.4",
   "description": "Provide what you expected from Instagram.",
   "dependencies": {
+    "blueimp-md5": "^2.10.0",
     "chrome-promise": "^2.0.2",
     "isotope-layout": "^3.0.3",
     "moment": "^2.18.1"
