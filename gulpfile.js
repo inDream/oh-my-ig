@@ -1,7 +1,6 @@
 const gulp = require('gulp');
 const gulpLoadPlugins = require('gulp-load-plugins');
 const del = require('del');
-const runSequence = require('run-sequence');
 const manifest = require('./dist/manifest.json');
 
 const $ = gulpLoadPlugins();
@@ -9,7 +8,12 @@ const $ = gulpLoadPlugins();
 gulp.task('extras', () =>
   gulp.src([
     'app/*.*',
-    'app/scripts/**/*',
+    'app/scripts/*',
+    'app/scripts/libs/chrome-promise.js',
+    'app/scripts/libs/isotope.pkgd.min.js',
+    'app/scripts/libs/md5.min.js',
+    'app/scripts/libs/moment.min.js',
+    'app/scripts/src/*',
     'app/_locales/**',
     '!app/*.html',
   ], {
@@ -63,16 +67,29 @@ gulp.task('html', () =>
 
 gulp.task('clean', del.bind(null, ['dist']));
 
-gulp.task('copy', () =>
+gulp.task('copy-css', () =>
   gulp.src([
-    'node_modules/chrome-promise/chrome-promise.js',
-    'node_modules/moment/min/moment.min.js',
-    'node_modules/isotope-layout/dist/isotope.pkgd.min.js',
+    'node_modules/materialize-css/dist/css/materialize.css',
+    'node_modules/magnific-popup/dist/magnific-popup.css',
   ])
-    .pipe(gulp.dest('app/scripts/libs'))
-    .pipe(gulp.dest('dist/scripts/libs')));
+    .pipe(gulp.dest('app/styles/libs')));
 
-gulp.task('watch', ['copy', 'lint'], () => {
+gulp.task('copy-js', () =>
+  gulp.src([
+    'node_modules/blueimp-md5/js/md5.min.js',
+    'node_modules/chrome-promise/chrome-promise.js',
+    'node_modules/imagesloaded/imagesloaded.pkgd.js',
+    'node_modules/isotope-layout/dist/isotope.pkgd.min.js',
+    'node_modules/jquery/dist/jquery.js',
+    'node_modules/magnific-popup/dist/jquery.magnific-popup.js',
+    'node_modules/materialize-css/dist/js/materialize.js',
+    'node_modules/moment/min/moment.min.js',
+  ])
+    .pipe(gulp.dest('app/scripts/libs')));
+
+gulp.task('copy', gulp.parallel('copy-css', 'copy-js'));
+
+gulp.task('watch', gulp.series('copy', 'lint'), () => {
   $.livereload.listen();
 
   gulp.watch([
@@ -96,15 +113,12 @@ gulp.task('package', () =>
     .pipe($.zip(`oh-my-ig-${manifest.version}.zip`))
     .pipe(gulp.dest('package')));
 
-gulp.task('build', (cb) => {
-  runSequence(
-    'copy', 'lint',
-    ['html', 'images', 'extras'],
-    'size',
-    cb,
-  );
-});
+gulp.task('build', gulp.series(
+  'copy', 'lint',
+  gulp.parallel('html', 'images', 'extras'),
+  'size',
+));
 
-gulp.task('default', ['clean'], (cb) => {
-  runSequence('build', cb);
+gulp.task('default', gulp.series('clean'), (cb) => {
+  gulp.series('build', cb);
 });
