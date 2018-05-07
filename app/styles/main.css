@@ -113,14 +113,48 @@ body, button, input, select {
 }
 
 .mfp-caption {
-  width: 80%;
-  max-width: 600px;
-  max-height: 600px;
-  overflow-y: auto;
-  word-break: break-all;
   background: #fafafa;
-  padding: 15px;
   margin: 0 auto;
+  max-height: 600px;
+  max-width: 600px;
+  overflow-y: auto;
+  padding: 15px;
+  width: auto;
+  word-break: break-all;
+}
+
+.mfp {
+  display: block;
+  height: 330px;
+  background: #fff center 15% no-repeat;
+  background-size: cover;
+}
+
+.mfp-inline-holder .mfp-content {
+  max-width: 1024px;
+  width: auto;
+}
+
+.mfp-inline-holder .mfp-close {
+  color: #FFF;
+  right: -14px;
+}
+
+.mfp-inline-holder .card-owner span {
+  display: block;
+}
+
+.mfp-video video {
+  display: block;
+  height: auto;
+  margin: 0 auto;
+  max-width: 100%;
+  margin: 40px 0 40px;
+  width: auto;
+}
+
+.card-image img {
+  visibility: hidden;
 }
 
 .card-video {
@@ -129,13 +163,14 @@ body, button, input, select {
 
 .card-video i {
   color: #eeeeee;
+  cursor: pointer;
   font-size: 6em;
-  position: absolute;
-  top: 50%;
   left: 50%;
   margin-left: -45px;
   margin-top: -45px;
-  z-index: 1;
+  pointer-events: none;
+  position: absolute;
   text-shadow: 0 0 10px #673AB7;
-  cursor: pointer;
+  top: 50%;
+  z-index: 1;
 }

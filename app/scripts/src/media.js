@@ -16,15 +16,27 @@ class Media {
     const caption = item.caption || '';
     const profile = `${base}${item.owner.username}/`;
     const link = `${base}p/${item.code}/`;
-    const likeIcon = item.likes ? `favorite${item.likes.viewer_has_liked ? '' : '_border'}` : '';
-    const style = `style="background-image: url(${item.display_src});"`;
+    const likeIcon = `favorite${item.viewer_has_liked ? '' : '_border'}`;
+    const src = item.display_src;
+    const style = `style="background-image: url(${src});"`;
+    const height = $(window).height() - 80;
+    const id = `mfp-${src.match(/([\w\d_-]*)\.?[^\\/]*$/i)[1]}`;
     const itemCard = item.video_url ?
       `<div class="card-image card-video">
         <i class="material-icons">play_arrow</i>
-        <a class="mfp mfp-iframe" href="${item.video_url}">` :
+        <a class="mfp" href="${item.video_url}" data-mfp-src="#${id}" ${style}>
+        <div id="${id}" class="mfp-figure mfp-hide mfp-video">
+          <video controls preload="none" style="max-height: ${height}px">
+            <source src="${item.video_url}" type="video/mp4">
+          </video>
+          <div class="mfp-bottom-bar"><div class="mfp-title"><div class="card-owner">
+            <span>${caption}</span>
+            <small>by ${item.owner.username} ${timeago} ago</small>
+          </div></div></div>
+        </div>` :
       `<div class="card-image">
-        <a class="mfp mfp-image" href="${item.display_src}" ${style}>
-        <img src="${item.display_src}" />`;
+        <a class="mfp mfp-image" href="${src}" ${style}>
+        <img src="${src}" />`;
 
     return `<div class="col s12 m6 l4">
       <div class="card" data-id="${i}">
