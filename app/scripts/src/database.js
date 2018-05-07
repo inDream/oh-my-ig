@@ -26,7 +26,7 @@ class Matcher {
       }
       const str = item.caption + item.owner.username + item.owner.full_name +
         (item.location ? item.location.name : '') + usertags;
-      return ((this.liked && item.likes.viewer_has_liked) || !this.liked) &&
+      return ((this.liked && item.viewer_has_liked) || !this.liked) &&
         (this.regexp.test(str) || item.owner.id === this.q);
     });
   }

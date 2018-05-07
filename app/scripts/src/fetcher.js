@@ -82,15 +82,12 @@ class Fetcher {
         item.caption = caption.length ? caption[0].node.text : '';
         item.likes = {
           count: item.edge_media_preview_like.count,
-          viewer_has_liked: item.viewer_has_liked,
         };
         item.comments = {
           count: item.edge_media_to_comment.count,
         };
         item.code = item.shortcode;
-        delete item.shortcode;
         item.display_src = fixSrc(item.display_url);
-        delete item.display_url;
         const usertags = { nodes: [] };
         if (item.edge_media_to_tagged_user.edges.length) {
           item.edge_media_to_tagged_user.edges.forEach((e) => {
@@ -98,7 +95,6 @@ class Fetcher {
           });
         }
         item.usertags = usertags;
-        delete item.edge_media_to_tagged_user;
 
         item.owner = {
           full_name: item.owner.full_name,
@@ -106,17 +102,6 @@ class Fetcher {
           profile_pic_url: item.owner.profile_pic_url,
           username: item.owner.username,
         };
-
-        delete item.attribution;
-        delete item.caption_is_edited;
-        delete item.comments_disabled;
-        delete item.edge_media_to_sponsor_user;
-        delete item.edge_web_media_to_related_media;
-        delete item.gating_info;
-        delete item.is_ad;
-        delete item.media_preview;
-        delete item.should_log_client_event;
-        delete item.tracking_token;
       }
       if (item.__typename === 'GraphSidecar') {
         const display_urls = []; // eslint-disable-line camelcase
@@ -126,9 +111,16 @@ class Fetcher {
             fixSrc(n.display_url));
         });
         item.display_urls = display_urls; // eslint-disable-line camelcase
-        delete item.edge_sidecar_to_children;
       }
       item.display_src = fixSrc(item.display_src);
+      const fields = ['caption', 'code', 'comments', 'date', 'display_src',
+        'display_urls', 'video_url', 'id', 'likes', 'location', 'owner',
+        'usertags', 'viewer_has_liked'];
+      Object.keys(item).forEach((key) => {
+        if (fields.indexOf(key) === -1) {
+          delete item[key];
+        }
+      });
       const key = moment(item.date * 1000).startOf('day') / 100000;
       if (key) {
         if (temp[key] === undefined) {

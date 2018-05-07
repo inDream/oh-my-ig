@@ -304,7 +304,7 @@ class Main {
     if (res) {
       this.currentItems[id] = res;
       const $c = $(`.card[data-id="${id}"]`);
-      const liked = res.likes.viewer_has_liked;
+      const liked = res.viewer_has_liked;
       $c.find('.likeIcon i').text(`favorite${liked ? '' : '_border'}`);
       $c.find('.likes').text(res.likes.count);
       $c.find('.comments').text(res.comments.count);
@@ -329,7 +329,7 @@ class Main {
       const $e = $(e.currentTarget);
       const id = $e.parents('.card').data('id');
       const item = this.currentItems[id];
-      const liked = item.likes.viewer_has_liked;
+      const liked = item.viewer_has_liked;
       new Media({ item, fetcher: this.fetcher })
         .like(liked)
         .then(res => this.updateItem(id, res));
