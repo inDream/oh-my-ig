@@ -1,7 +1,7 @@
 const pdelay = ms => new Promise(resolve => setTimeout(resolve, ms));
 const fixSrc = (src) => {
-  let s = src;
-  if (s.match(/\/fr\//)) {
+  const s = src;
+  if (s.match(/\/fr\/|_a\.jpg|s1080/)) {
     return s;
   }
   return s.replace(/c\d+\.\d+\.\d+\.\d+\//, '')
