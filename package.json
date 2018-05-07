@@ -4,52 +4,40 @@
   "description": "Provide what you expected from Instagram.",
   "dependencies": {
     "blueimp-md5": "^2.10.0",
-    "chrome-promise": "^2.0.2",
-    "isotope-layout": "^3.0.3",
-    "moment": "^2.18.1"
+    "chrome-promise": "^3.0.0",
+    "imagesloaded": "^4.1.4",
+    "isotope-layout": "^3.0.6",
+    "jquery": "^3.3.1",
+    "magnific-popup": "^1.1.0",
+    "materialize-css": "^1.0.0-rc.1",
+    "moment": "^2.22.1"
   },
   "devDependencies": {
-    "del": "^2.2.2",
-    "eslint": "^4.18.1",
+    "del": "^3.0.0",
+    "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-import-resolver-node": "^0.3.2",
-    "eslint-plugin-import": "^2.9.0",
-    "gulp": "^3.9.1",
-    "gulp-cache": "^0.4.6",
-    "gulp-clean-css": "^3.0.4",
-    "gulp-eslint": "^3.0.1",
+    "eslint-plugin-import": "^2.11.0",
+    "gulp": "^4.0.0",
+    "gulp-cache": "^1.0.2",
+    "gulp-clean-css": "^3.9.4",
+    "gulp-eslint": "^4.0.2",
+    "gulp-htmlmin": "^4.0.0",
     "gulp-if": "^2.0.2",
-    "gulp-imagemin": "^3.2.0",
+    "gulp-imagemin": "^4.1.0",
     "gulp-livereload": "^3.8.1",
     "gulp-load-plugins": "^1.5.0",
-    "gulp-htmlmin": "^3.0.0",
-    "gulp-size": "^2.1.0",
-    "gulp-uglify": "^2.1.2",
-    "gulp-useref": "^3.1.2",
-    "gulp-zip": "^4.0.0",
-    "main-bower-files": "^2.13.1",
-    "run-sequence": "^1.2.2",
-    "wiredep": "^4.0.0"
-  },
-  "eslintConfig": {
-    "env": {
-      "node": true,
-      "browser": true
-    },
-    "globals": {
-      "chrome": true
-    },
-    "rules": {
-      "eol-last": 0,
-      "quotes": [
-        2,
-        "single"
-      ]
-    }
+    "gulp-size": "^3.0.0",
+    "gulp-uglify": "^3.0.0",
+    "gulp-useref": "^3.1.5",
+    "gulp-zip": "^4.1.0"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/inDream/oh-my-ig.git"
+  },
+  "scripts": {
+    "postinstall": "gulp copy"
   },
   "license": "MIT"
 }
