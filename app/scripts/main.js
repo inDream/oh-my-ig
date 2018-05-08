@@ -199,7 +199,7 @@ class Main {
     for (let i = 0; i < items.length; i += 1) {
       const e = items[i];
       const len = e.display_urls ? e.display_urls.length : 1;
-      if (total + len > this.feedPerPage) {
+      if (total + len > this.feedPerPage && i !== items.length - 1) {
         total = 0;
         page += 1;
       } else {
@@ -221,7 +221,7 @@ class Main {
       if (total + len > this.feedPerPage) {
         if (this.currentPage !== page) {
           total = 0;
-          start = i;
+          start = i + 1;
           res = [];
           page += 1;
         } else {
