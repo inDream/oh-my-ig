@@ -71,6 +71,9 @@ class Media {
           <a class="btn-link reloadBtn" title="Reload">
             <i class="material-icons">refresh</i>
           </a>
+          <a class="btn-link deleteBtn" title="Delete">
+            <i class="material-icons">delete</i>
+          </a>
         </div>
       </div>
     </div>`;

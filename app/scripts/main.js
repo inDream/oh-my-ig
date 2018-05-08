@@ -345,6 +345,17 @@ class Main {
         .then(res => this.updateItem(id, res));
       A.e('feed', 'click-reload', this.getDateLabel(item.date / 100));
     });
+
+    $('.deleteBtn').click(async (e) => {
+      const $e = $(e.currentTarget);
+      const id = $e.parents('.card').data('id');
+      const item = this.currentItems[id];
+      const key = moment(item.date * 1000).startOf('day') / 100000;
+      DB.deleteItem(`${key}`, item.id);
+      this.currentItems.splice(id, 1);
+      this.sortItems(this.currentItems);
+      this.setItemContent();
+    });
   }
 
   setPagination() {

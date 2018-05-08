@@ -93,6 +93,24 @@ class DB {
     return sL.remove(key);
   }
 
+  static async deleteItem(key, id) {
+    const old = await DB.g(key);
+    const newItems = (old || []).filter(item => item.id !== id);
+    if (!old || newItems.length === old.length) {
+      return;
+    }
+    const dates = JSON.parse(localStorage.dates);
+    const idx = dates.map(e => e.key).indexOf(key);
+    if (newItems.length) {
+      dates[idx] = { key, count: newItems.length };
+      DB.s({ [key]: newItems });
+    } else {
+      dates.splice(idx, 1);
+      DB.rm(key);
+    }
+    localStorage.dates = JSON.stringify(dates);
+  }
+
   static push(key, oldItems) {
     // Push new items into old list
     let items = oldItems;
