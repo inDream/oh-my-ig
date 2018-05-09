@@ -19,11 +19,13 @@ moment.updateLocale('en', {
 class Main {
   constructor() {
     this.db = new DB();
+    this.pageType = window.location.pathname.slice(1, -5);
 
     this.base = 'https://www.instagram.com/';
     this.currentKey = null;
     this.currentItems = null;
     this.currentPage = null;
+    this.displayOptsName = `${this.pageType}DisplayOpts`;
     this.totalPages = null;
     this.filterQuery = null;
     this.searchQuery = null;
@@ -76,6 +78,16 @@ class Main {
   init() {
     DB.g('options')
       .then((options) => {
+        const [columns, isSquare, hide] = options[this.displayOptsName].split('-');
+        $('#noOfColumns').val(columns);
+        $('#squarePhoto').prop('checked', !!isSquare);
+        hide.split('|').forEach((h) => {
+          $(`.displayOpts[data-hide='${h}']`).click();
+        });
+        this.setDisplayOpts(true);
+        $('#noOfColumns, #squarePhoto, .displayOpts')
+          .change(() => this.setDisplayOpts());
+
         switch (window.location.pathname) {
           case '/feed.html':
             this.addDates().then((dates) => {
@@ -107,7 +119,6 @@ class Main {
     $('#searchFeed').keyup(this.searchFeed.bind(this));
     $('#searchLiked, #searchTagged').click(this.searchFeed.bind(this));
     $('#resetSearch').click(this.resetSearch.bind(this));
-    $('#noOfColumns, .displayOpts').change(this.setDisplayOpts.bind(this));
     $('.brand-logo').click(() => window.scrollTo(0, 0));
 
     // Fix for multiple dropdown activate
@@ -470,18 +481,26 @@ class Main {
     this.loadFeed(this.currentKey);
   }
 
-  setDisplayOpts() {
+  setDisplayOpts(isInit) {
     const columns = $('#noOfColumns').val();
+    const isSquare = $('#squarePhoto').prop('checked');
     const width = 100 / columns;
     const height = ((document.body.clientWidth * 0.9) / columns) - 10;
     const hide = Array.from($('.displayOpts:checked')).map(e => e.dataset.hide);
     const hideCSS = hide.length ? `${hide.join(', ')}{display: none;}` : '';
     $('#feedStyle').text(`
       #feedItems .col {width: ${width}%;}
-      .mfp {height: ${height}px;}
+      .mfp {height: ${isSquare ? `${height}px` : 'auto'};}
+      .card-video .mfp {min-height: ${height}px;}
       ${hideCSS}`);
     $('#feedItems').isotope('layout');
-    A.e('feed', 'displayOpts', `${$('#noOfColumns').val()}-${hide.join('|')}`);
+    if (isInit !== true) {
+      const data = {};
+      const displayOpts = `${columns}-${isSquare ? '1' : ''}-${hide.join('|')}`;
+      data[this.displayOptsName] = displayOpts;
+      A.e('feed', 'displayOpts', displayOpts);
+      chrome.runtime.sendMessage({ action: 'saveOptions', data });
+    }
   }
 }
 

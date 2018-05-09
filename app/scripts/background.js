@@ -16,6 +16,7 @@ function setupAlarms() {
 chrome.storage.local.get('options', (res) => {
   const defaultOptions = {
     autoReload: 5,
+    feedDisplayOpts: '3--',
     feedPerPage: 50,
     syncCount: 10,
     syncEach: 12,
@@ -56,7 +57,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       fetcher.auto(options.syncCount);
       break;
     case 'saveOptions':
-      options = request.data;
+      options = Object.assign({}, options, request.data);
       fetcher.syncEach = options.syncEach;
       setupAlarms();
       DB.s({ options });
