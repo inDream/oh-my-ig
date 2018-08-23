@@ -15,7 +15,7 @@ class Fetcher {
     this.token = null;
     this.lastCursor = null;
     this.query_id = '17866917712078875';
-    this.query_hash = 'd6f4427fbe92d846298cf93df0b937d3';
+    this.query_hash = 'bcbc6b4219dbbdf7af876bf561d7a283';
     this.rhxGis = '';
   }
 
@@ -169,7 +169,7 @@ class Fetcher {
       .then((rawBody) => {
         let body = rawBody;
         try {
-          body = body.slice(0, body.lastIndexOf('edge_web_feed_timeline'));
+          body = body.slice(body.indexOf('edge_web_feed_timeline'));
           const hash = body.match(/\w="\w{32}",\w="\w{32}",\w="\w{32}"/g);
           this.query_hash = hash[0].slice(3, 35);
         } catch (e) {
