@@ -7,6 +7,7 @@ const fixSrc = (src) => {
   return s.replace(/c\d+\.\d+\.\d+\.\d+\//, '')
     .replace(/\w\d{3,4}x\d{3,4}\//g, s.match(/\/e\d{2}\//) ? '' : 'e15/');
 };
+const storeTypes = ['GraphImage', 'GraphSidecar', 'GraphVideo'];
 
 class Fetcher {
   constructor(options) {
@@ -73,10 +74,13 @@ class Fetcher {
 
   storeItem(items) {
     const temp = {};
-    items.forEach((rawItem) => {
-      let item = rawItem;
+    for (let i = 0; i < items.length; i += 1) {
+      let item = items[i];
       if (item.node) {
         item = item.node;
+        if (storeTypes.indexOf(item.__typename) === -1) {
+          continue;
+        }
         item.date = item.taken_at_timestamp;
         const caption = item.edge_media_to_caption.edges;
         item.caption = caption.length ? caption[0].node.text : '';
@@ -112,7 +116,6 @@ class Fetcher {
         });
         item.display_urls = display_urls; // eslint-disable-line camelcase
       }
-      item.display_src = fixSrc(item.display_src);
       const fields = ['caption', 'code', 'comments', 'date', 'display_src',
         'display_urls', 'video_url', 'id', 'likes', 'location', 'owner',
         'usertags', 'viewer_has_liked'];
@@ -128,7 +131,7 @@ class Fetcher {
         }
         temp[key].push(item);
       }
-    });
+    }
     const newItems = Object.keys(temp).map(key => (DB.push(key, temp[key])));
     return Promise.all(newItems);
   }
