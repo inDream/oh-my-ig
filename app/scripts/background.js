@@ -12,6 +12,28 @@ function setupAlarms() {
   });
 }
 
+function handleRequests() {
+  chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
+    let referer = false;
+    details.requestHeaders.forEach((header) => {
+      if (details.tabId === -1 && header.name === 'Origin') {
+        header.value = base;
+      }
+      if (header.name === 'Referer') {
+        header.value = base;
+        referer = true;
+      }
+    });
+    if (!referer) {
+      details.requestHeaders.push({
+        name: 'Referer',
+        value: base,
+      });
+    }
+    return { requestHeaders: details.requestHeaders };
+  }, { urls: [`${base}*`] }, ['blocking', 'requestHeaders']);
+}
+
 // Set up init options
 chrome.storage.local.get('options', (res) => {
   const defaultOptions = {
@@ -26,6 +48,7 @@ chrome.storage.local.get('options', (res) => {
   options = Object.assign(defaultOptions, res.options);
   chrome.storage.local.set({ options });
 
+  handleRequests();
   fetcher = new Fetcher(options);
   // Export for main page
   window.fetcher = fetcher;
@@ -74,23 +97,3 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   return true;
 });
-
-chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
-  let referer = false;
-  details.requestHeaders.forEach((header) => {
-    if (details.tabId === -1 && header.name === 'Origin') {
-      header.value = base;
-    }
-    if (header.name === 'Referer') {
-      header.value = base;
-      referer = true;
-    }
-  });
-  if (!referer) {
-    details.requestHeaders.push({
-      name: 'Referer',
-      value: base,
-    });
-  }
-  return { requestHeaders: details.requestHeaders };
-}, { urls: [`${base}*`] }, ['blocking', 'requestHeaders']);

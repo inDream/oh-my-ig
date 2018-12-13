@@ -161,7 +161,9 @@ class Fetcher {
           feed = feed[0].graphql.user.edge_web_feed_timeline;
           this.storeItem(feed.edges);
           this.lastCursor = feed.page_info.end_cursor;
-        } catch (e) {}
+        } catch (e) {
+          this.lastCursor = null;
+        }
         this.token = data.config.csrf_token;
 
         let common = doc.querySelector('script[src*="Commons.js"]');
@@ -172,9 +174,9 @@ class Fetcher {
       .then((rawBody) => {
         let body = rawBody;
         try {
-          body = body.slice(body.indexOf('edge_web_feed_timeline'));
-          const hash = body.match(/\w="\w{32}",\w="\w{32}",\w="\w{32}"/g);
-          this.query_hash = hash[0].slice(3, 35);
+          let hash = body.slice(0, body.indexOf('edge_web_feed_timeline'))
+            .match(/\w="\w{32}",\w="\w{32}",\w="\w{32}"/g);
+          this.query_hash = hash[hash.length - 1].slice(3, 35);
         } catch (e) {
           this.query_hash = null;
         }
