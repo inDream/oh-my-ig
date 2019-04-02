@@ -13,6 +13,7 @@ class Fetcher {
   constructor(options) {
     this.base = 'https://www.instagram.com/';
     this.syncEach = options.syncEach;
+    this.ajaxToken = null;
     this.token = null;
     this.lastCursor = null;
     this.query_id = '17866917712078875';
@@ -46,7 +47,7 @@ class Fetcher {
         Accept: 'application/json, text/javascript, */*; q=0.01',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'X-CSRFToken': this.token,
-        'X-Instagram-Ajax': 1,
+        'X-Instagram-Ajax': this.ajaxToken,
         'X-Requested-With': 'XMLHttpRequest',
       },
       credentials: 'include',
@@ -88,7 +89,7 @@ class Fetcher {
           count: item.edge_media_preview_like.count,
         };
         item.comments = {
-          count: item.edge_media_to_comment.count,
+          count: (item.edge_media_preview_comment || item.edge_media_to_comment).count,
         };
         item.code = item.shortcode;
         item.display_src = fixSrc(item.display_url);
@@ -165,6 +166,7 @@ class Fetcher {
           this.lastCursor = null;
         }
         this.token = data.config.csrf_token;
+        this.ajaxToken = data.rollout_hash;
 
         let common = doc.querySelector('script[src*="Commons.js"]');
         common = this.base + common.getAttribute('src').slice(1);
@@ -174,9 +176,8 @@ class Fetcher {
       .then((rawBody) => {
         let body = rawBody;
         try {
-          let hash = body.slice(0, body.indexOf('edge_web_feed_timeline'))
-            .match(/\w="\w{32}",\w="\w{32}",\w="\w{32}"/g);
-          this.query_hash = hash[hash.length - 1].slice(3, 35);
+          let hash = body.slice(body.indexOf('FEED_QUERY_ID')).match(/"(\w{32})"/);
+          this.query_hash = hash[1];
         } catch (e) {
           this.query_hash = null;
         }
@@ -191,15 +192,16 @@ class Fetcher {
         fetch_media_item_count: this.syncEach,
         fetch_media_item_cursor: this.lastCursor,
         fetch_comment_count: 4,
-        fetch_like: 10,
+        fetch_like: 3,
         has_stories: false,
+        has_threaded_comments: false,
       });
       url = `hash=${this.query_hash}&variables=${encodeURIComponent(data)}`;
     } else {
       url = `id=${this.query_id}&` +
         `fetch_media_item_count=${this.syncEach}&` +
         `fetch_media_item_cursor=${this.lastCursor}&` +
-        'fetch_comment_count=4&fetch_like=10';
+        'fetch_comment_count=4&fetch_like=3';
     }
     return this.getJSON(`graphql/query/?query_${url}`).then((body) => {
       const feed = body.data.user.edge_web_feed_timeline;
