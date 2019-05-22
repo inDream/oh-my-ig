@@ -168,7 +168,7 @@ class Fetcher {
         this.token = data.config.csrf_token;
         this.ajaxToken = data.rollout_hash;
 
-        let common = doc.querySelector('script[src*="Commons.js"]');
+        let common = doc.querySelector('script[src*="Consumer.js"]');
         common = this.base + common.getAttribute('src').slice(1);
         return fetch(common, { credentials: 'include' });
       })
