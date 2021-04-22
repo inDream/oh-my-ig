@@ -1,4 +1,5 @@
 const base = 'https://www.instagram.com/';
+const cdnBase = 'https://*.cdninstagram.com/*';
 let options = null;
 let fetcher = null;
 const db = new DB();
@@ -32,6 +33,18 @@ function handleRequests() {
     }
     return { requestHeaders: details.requestHeaders };
   }, { urls: [`${base}*`] }, ['blocking', 'requestHeaders']);
+
+  chrome.webRequest.onHeadersReceived.addListener((details) => {
+    const headers = [];
+    details.responseHeaders.forEach((header) => {
+      const headerName = header.name.toLowerCase();
+      if (headerName.indexOf('cross-origin-resource-policy') === 0) {
+        return;
+      }
+      headers.push(header);
+    });
+    return { responseHeaders: headers };
+  }, { urls: [cdnBase] }, ['blocking', 'responseHeaders', 'extraHeaders']);
 }
 
 // Set up init options

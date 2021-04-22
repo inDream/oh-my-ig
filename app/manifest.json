@@ -29,7 +29,8 @@
     "unlimitedStorage",
     "webRequest",
     "webRequestBlocking",
-    "*://*.instagram.com/"
+    "*://*.instagram.com/",
+    "*://*.cdninstagram.com/"
   ],
   "browser_action": {
     "default_icon": {
